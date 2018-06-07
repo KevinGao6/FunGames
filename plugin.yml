@@ -1,0 +1,8 @@
+name: MCPFun
+main: me.MCPFun.main.MCPFunMain
+version: 0.1
+description: Implements a fun gamemode
+commands:
+     start:
+          usage: /<commmand>
+          description: Starts the gamemode
