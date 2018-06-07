@@ -6,10 +6,19 @@ import java.util.TreeSet;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.Server;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Snowball;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+
+import me.MCPFun.reference.FunType;
 
 /**
  * The first, original gamemode of the server
@@ -19,6 +28,46 @@ import org.bukkit.inventory.PlayerInventory;
 public class AmmunitionConundrum {
 
 	/**
+	 * Default armor of each player
+	 */
+	private static final ItemStack[] DEFAULT_ARMOR = {new ItemStack(Material.IRON_HELMET, 1), new ItemStack(Material.IRON_CHESTPLATE, 1), new ItemStack(Material.IRON_LEGGINGS, 1), new ItemStack(Material.IRON_BOOTS, 1)};
+
+	/**
+	 * Default weapon of each player
+	 */
+	private static final Material DEFAULT_MELEE = Material.DIAMOND_SWORD;
+
+	/**
+	 * Default sharpness level of each DEFAULT_MELEE weapon
+	 */
+	private static final int DEFAULT_SHARPNESS_LEVEL = 2;
+
+	/**
+	 * Default Fun
+	 */
+	private static final ItemStack DEFAULT_FUN = new ItemStack(Material.STICK, 1);
+
+	/**
+	 * Speed of snowballs
+	 */
+	private static final double speed = 999;
+
+	/**
+	 * Instant damage to a normal player that misfires
+	 */
+	private static final double DEFAULT_MISFIRE_DAMAGE = 4.0;
+
+	/**
+	 * Ticks which a normal player is set aflame if he/she misfires
+	 */
+	private static final int DEFAULT_MISFIRE_LENGTH = 10;
+
+	/**
+	 * This current server
+	 */
+	private Server server;
+	
+	/**
 	 * Treeset of all participating players
 	 */
 	private TreeSet<Player> players;
@@ -27,6 +76,16 @@ public class AmmunitionConundrum {
 	 * The moderator of the game - can be a participating player
 	 */
 	private Player moderator;
+
+	/**
+	 * The players who are currently alive
+	 */
+	private ArrayList<Player> alives;
+
+	/**
+	 * The players who are dead
+	 */
+	private ArrayList<Player> deads;
 
 	/**
 	 * The players who are the normal class for this round
@@ -44,35 +103,29 @@ public class AmmunitionConundrum {
 	private ArrayList<Player> protecteds;
 
 	/**
-	 * Default armor of each player
+	 * Whether or not a round is currently active
 	 */
-	private static final ItemStack[] DEFAULT_ARMOR = {new ItemStack(Material.IRON_HELMET, 1), new ItemStack(Material.IRON_CHESTPLATE, 1), new ItemStack(Material.IRON_LEGGINGS, 1), new ItemStack(Material.IRON_BOOTS, 1)};
-	
+	private boolean roundActive;
+
 	/**
-	 * Default weapon of each player
+	 * Whether or not the special can fire
 	 */
-	private static final Material DEFAULT_MELEE = Material.DIAMOND_SWORD;
-	
+	private boolean hasBoolay;
+
 	/**
-	 * Default sharpness level of each DEFAULT_MELEE weapon
-	 */
-	private static final int DEFAULT_SHARPNESS_LEVEL = 2;
-	
-	/**
-	 * Default Fun
-	 */
-	private static final ItemStack DEFAULT_FUN = new ItemStack(Material.STICK, 1);
-	
-	/**
-	 * Defualt constructor
+	 * Default constructor
 	 * @param moderator the default moderator
 	 */
-	public AmmunitionConundrum(Player moderator){
+	public AmmunitionConundrum(Server server, Player moderator){
+		this.server = server;
 		players = new TreeSet<Player>();
 		this.moderator = moderator;
 		normals = new ArrayList<Player>();
 		specials = new ArrayList<Player>();
 		protecteds = new ArrayList<Player>();
+		alives = new ArrayList<Player>();
+		deads = new ArrayList<Player>();
+		roundActive = false;
 	}
 
 	/**
@@ -82,8 +135,8 @@ public class AmmunitionConundrum {
 	 * @param p2 player 2
 	 * @param p3 player 3
 	 */
-	public AmmunitionConundrum(Player moderator, Player p1, Player p2, Player p3){
-		this(moderator);
+	public AmmunitionConundrum(Server server, Player moderator, Player p1, Player p2, Player p3){
+		this(server, moderator);
 		players.add(p1);
 		players.add(p2);
 		players.add(p3);
@@ -154,24 +207,24 @@ public class AmmunitionConundrum {
 
 		ItemStack DEFAULT_WEAPON = new ItemStack(DEFAULT_MELEE, 1);
 		DEFAULT_WEAPON.addEnchantment(Enchantment.DAMAGE_ALL, DEFAULT_SHARPNESS_LEVEL);
-		
+
 		//Default kits for each player
 		for (Player p: players){
-			
+
 			//Set players to adventure mode
 			p.setGameMode(GameMode.ADVENTURE);
-			
+
 			PlayerInventory inventory = p.getInventory();
-			
+
 			//Clear Inventory
 			inventory.clear();
-			
+
 			//Give Armor
 			inventory.setArmorContents(DEFAULT_ARMOR);
-			
+
 			//Give weapon
 			inventory.addItem(DEFAULT_WEAPON);
-			
+
 			//Give weapon
 			inventory.addItem(DEFAULT_FUN);
 		}
@@ -187,9 +240,10 @@ public class AmmunitionConundrum {
 
 		ArrayList<Player> curPlayers = new ArrayList<Player>(players.size());
 		for (Player p: players){
-			
+
 			//TODO: Teleport people to corresponding places
 			curPlayers.add(p);
+			alives.add(p);
 		}
 
 		//TODO: Better method of sorting people
@@ -206,5 +260,114 @@ public class AmmunitionConundrum {
 		System.out.println(ChatColor.RED + "Specials are: " + specials);
 		System.out.println(ChatColor.YELLOW + "Protecteds are: " + protecteds);
 		System.out.println(ChatColor.GREEN + "Normals are: " + normals);
+	}
+
+	/**
+	 * Called when a player in an AC Game interacts with anything
+	 */
+	public void shoot(PlayerInteractEvent e){
+		//Null checks
+		if (e == null || e.getItem() == null)
+			return;
+
+		Action a = e.getAction();
+		Material m = e.getItem().getType();
+		Player p = e.getPlayer();
+
+		//Player right clicks anything
+		if (a.equals(Action.RIGHT_CLICK_AIR) || a.equals(Action.RIGHT_CLICK_BLOCK)){
+			//Check for valid weapon
+			if (m.equals(DEFAULT_FUN.getType())){
+
+				//Protected: Do nothing
+				if (protecteds.contains(p)){
+					return;
+				}
+
+				//Normals: Set misfire effect
+				else if (normals.contains(p)){
+					misfire(p);
+					return;
+				}
+
+				//Specials: Attempt to throw snowball
+				else if (specials.contains(p)){
+					if (hasBoolay){
+						Snowball s = p.launchProjectile(Snowball.class);
+						s.setVelocity(p.getLocation().getDirection().multiply(speed));
+						hasBoolay = false;
+					}
+
+					else{
+						p.sendMessage(ChatColor.RED + "No bullets left!");
+					}
+				}
+			}
+		}
+	}
+
+	@SuppressWarnings("deprecation")
+	public void hit(EntityDamageByEntityEvent e){
+		
+		if (e == null)
+			return;
+		
+		Entity ent = e.getDamager();
+		Entity victim = e.getEntity();
+		
+		if (ent == null || victim == null){
+			System.out.println("Something is amiss");
+			return;
+		}
+
+		//If the damager is a snowball shot by a player
+		if (ent instanceof Snowball && ((Snowball)ent).getShooter() instanceof Player && ((Player)victim) instanceof Player){
+			Player shooter = (Player)(((Snowball)ent).getShooter());			
+			Player shotted = ((Player)victim);
+			
+			if (protecteds.contains(shotted)){
+				shooter.damage(1000.0);
+				shooter.sendMessage(ChatColor.RED + "You shot the deflector!");
+			}
+			
+			else{
+				shotted.damage(1000.0);
+				shotted.sendMessage(ChatColor.RED + "You were killed by the shooter's sole bullet!");
+			}
+		}
+	}
+	
+	/**
+	 * Called whenever a player dies
+	 * @param e the PlayerDeath Event
+	 */
+	public void death(PlayerDeathEvent e){
+		Player p = e.getEntity();
+		if (alives.contains(p)){
+			deads.add(p);
+			alives.remove(p);
+			
+			if (alives.size() <= 1)
+				roundOver();
+		}
+	}
+	
+	/**
+	 * Called at the end of a round when a singular player has won
+	 */
+	private void roundOver(){
+		server.broadcastMessage("" + ChatColor.BOLD + ChatColor.DARK_RED + "Round Over!");
+		if (alives.size() > 0)
+			server.broadcastMessage("" + ChatColor.BOLD + ChatColor.AQUA + alives.get(0).getDisplayName() + " is the winner!");
+
+	}
+
+	/**
+	 * Damages and sets aflame a given player
+	 * @param p player that misfired
+	 */
+	private void misfire(Player p){
+		p.damage(DEFAULT_MISFIRE_DAMAGE);
+		p.setFireTicks(DEFAULT_MISFIRE_LENGTH);
 	}
 }
