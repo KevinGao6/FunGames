@@ -3,7 +3,13 @@ package me.MCPFun.gamemodes;
 import java.util.ArrayList;
 import java.util.TreeSet;
 
+import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
+import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 /**
  * The first, original gamemode of the server
@@ -15,28 +21,48 @@ public class AmmunitionConundrum {
 	/**
 	 * Treeset of all participating players
 	 */
-	TreeSet<Player> players;
+	private TreeSet<Player> players;
 
 	/**
 	 * The moderator of the game - can be a participating player
 	 */
-	Player moderator;
-	
+	private Player moderator;
+
 	/**
 	 * The players who are the normal class for this round
 	 */
-	ArrayList<Player> normals;
-	
+	private ArrayList<Player> normals;
+
 	/**
 	 * The players who are the special class for this round
 	 */
-	ArrayList<Player> specials;
-	
+	private ArrayList<Player> specials;
+
 	/**
 	 * The players who are the protected class for this round
 	 */
-	ArrayList<Player> protecteds;
+	private ArrayList<Player> protecteds;
 
+	/**
+	 * Default armor of each player
+	 */
+	private static final ItemStack[] DEFAULT_ARMOR = {new ItemStack(Material.IRON_HELMET, 1), new ItemStack(Material.IRON_CHESTPLATE, 1), new ItemStack(Material.IRON_LEGGINGS, 1), new ItemStack(Material.IRON_BOOTS, 1)};
+	
+	/**
+	 * Default weapon of each player
+	 */
+	private static final Material DEFAULT_MELEE = Material.DIAMOND_SWORD;
+	
+	/**
+	 * Default sharpness level of each DEFAULT_MELEE weapon
+	 */
+	private static final int DEFAULT_SHARPNESS_LEVEL = 2;
+	
+	/**
+	 * Default Fun
+	 */
+	private static final ItemStack DEFAULT_FUN = new ItemStack(Material.STICK, 1);
+	
 	/**
 	 * Defualt constructor
 	 * @param moderator the default moderator
@@ -90,7 +116,7 @@ public class AmmunitionConundrum {
 			this.moderator.sendMessage(p.getDisplayName() + " was added to the group");
 			return;
 		}
-		
+
 		this.moderator.sendMessage("Too many existing players. Please remove a player before adding another.");
 	}
 
@@ -116,22 +142,69 @@ public class AmmunitionConundrum {
 	public void removeAllPlayers(){
 		for (Player p: players)
 			players.remove(p);
-		
+
 		this.moderator.sendMessage("All players removed.");
 	}
 
+	/**
+	 * Activates the next round in this Ammunition Conundrum game
+	 */
 	public void nextRound(){
-		//TODO: Teleport people to corresponding places
+		generateRoles();
+
+		ItemStack DEFAULT_WEAPON = new ItemStack(DEFAULT_MELEE, 1);
+		DEFAULT_WEAPON.addEnchantment(Enchantment.DAMAGE_ALL, DEFAULT_SHARPNESS_LEVEL);
+		
+		//Default kits for each player
+		for (Player p: players){
+			
+			//Set players to adventure mode
+			p.setGameMode(GameMode.ADVENTURE);
+			
+			PlayerInventory inventory = p.getInventory();
+			
+			//Clear Inventory
+			inventory.clear();
+			
+			//Give Armor
+			inventory.setArmorContents(DEFAULT_ARMOR);
+			
+			//Give weapon
+			inventory.addItem(DEFAULT_WEAPON);
+			
+			//Give weapon
+			inventory.addItem(DEFAULT_FUN);
+		}
+	}
+
+	/**
+	 * Randomly generate roles for each participating player
+	 */
+	private void generateRoles(){
 		normals = new ArrayList<Player>();
 		specials = new ArrayList<Player>();
 		protecteds = new ArrayList<Player>();
-		
-		Player[] curPlayers = new Player[players.size()];
-		int i = 0;
+
+		ArrayList<Player> curPlayers = new ArrayList<Player>(players.size());
 		for (Player p: players){
-			curPlayers[i] = p;
-			i ++;
-		}
 			
+			//TODO: Teleport people to corresponding places
+			curPlayers.add(p);
+		}
+
+		//TODO: Better method of sorting people
+		int ran = (int)(Math.random()*curPlayers.size());
+		specials.add(curPlayers.remove(ran));
+
+		ran = (int)(Math.random()*curPlayers.size());
+		protecteds.add(curPlayers.remove(ran));
+
+		for (Player p: curPlayers){
+			normals.add(p);
+		}
+
+		System.out.println(ChatColor.RED + "Specials are: " + specials);
+		System.out.println(ChatColor.YELLOW + "Protecteds are: " + protecteds);
+		System.out.println(ChatColor.GREEN + "Normals are: " + normals);
 	}
 }
