@@ -15,6 +15,8 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import me.MCPFun.reference.FunType;
+
 /**
  * This class represents the main class for this JavaPlugin
  * @author Kevin
@@ -91,12 +93,18 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 	public void onEntityDamage(EntityDamageByEntityEvent e){
 		Entity ent = e.getDamager();
 		Entity victim = e.getEntity();
-		//TODO: Seperate class for snowball
+		
+		//If the damager is a snowball shot by a player
 		if (ent instanceof Snowball && ((Snowball)ent).getShooter() instanceof Player){
 			Player shooter = (Player)(((Snowball)ent).getShooter());
 			Material m = shooter.getItemInHand().getType();		
+			
+			//Find the corresponding FunType
 			for (FunType t: FunType.values()){
+				//Based on currently held material
 				if (m.equals(t.getMaterial())){
+					
+					//Set damage of boolay
 					e.setDamage(t.getDamage());
 					shooter.sendMessage("" + t.getColor() + "Nice shot, " + shooter.getDisplayName() + "!");
 					if(victim.isDead()){

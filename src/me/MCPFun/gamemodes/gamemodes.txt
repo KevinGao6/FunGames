@@ -1,0 +1,9 @@
+AmmunitionConundrum
+3 Players: 
+Special
+- Functional Bullet
+Normal
+- Bullet that will backfire
+Protected
+- Bullet Deflector, die in one shot to normal person
+- Knows they are the protected

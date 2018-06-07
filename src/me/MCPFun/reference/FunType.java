@@ -1,4 +1,4 @@
-package me.MCPFun.main;
+package me.MCPFun.reference;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -9,9 +9,10 @@ import org.bukkit.Material;
  *
  */
 public enum FunType {
-
-	ClassicFun (Material.IRON_AXE, 5, ChatColor.AQUA),
-	GoldenFun (Material.DIAMOND_AXE, 1000, ChatColor.DARK_PURPLE);
+	
+	GOLD (Material.STICK, 100, ChatColor.DARK_PURPLE),
+	CLASSIC_FUN (Material.IRON_AXE, 5, ChatColor.AQUA),
+	GOLDEN_FUN (Material.DIAMOND_AXE, 1000, ChatColor.DARK_PURPLE);
 	
 	private final Material material;
 	private final double damage;
