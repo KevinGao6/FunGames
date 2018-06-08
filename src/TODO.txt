@@ -1,27 +1,29 @@
 AmmunitionConundrum
+- Cleanup commands
 - Moderator Checks
 - Don't drop items
 - No mobs
-- Calling Next on roundActive
-- Cleanup commands
-- Better Colors
-- IO, save settings
+- Time Set 0 Constant
+- Food Constant
+- Adding Non-existant players check
 - Scoreboard/Title text
 	- New Game Printout
-- Print Info
-- Reverse Armor
-- Better Method for Assigning Roles
+- Calling Next on roundActive
 - Special
 	- Snowball Damaage
 	- No bullets actually doesn't shoot
 	- Normals/Protecteds can't shoot
 - Better Kill messsage involving player names -- printoutto console involving lists of players
     - /reveal
+
+- Better Colors
+- IO, save settings
+- Print Info
+- Reverse Armor
+- Better Method for Assigning Roles
+
 - Spawn Locations
 - Freeze Player/Fade in/No attack time
-- Time Set 0 Constant
-- Food Constant
-- Adding Non-existant players check
 - Tell protectors their role
 - Death Messages/Killfeed
 - Managing Multiple Games
