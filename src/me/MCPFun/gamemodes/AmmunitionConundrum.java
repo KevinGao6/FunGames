@@ -172,7 +172,7 @@ public class AmmunitionConundrum {
 			return;
 		}
 
-		if (!players.contains(p)){
+		if (players.contains(p)){
 			this.tellModerator("Player already in game.");
 			return;
 		}
@@ -202,8 +202,7 @@ public class AmmunitionConundrum {
 	 * Keeps the current moderator
 	 */
 	public void removeAllPlayers(){
-		for (Player p: players)
-			players.remove(p);
+		players = new ArrayList<Player>();
 
 		this.tellModerator("All players removed.");
 	}
@@ -261,8 +260,8 @@ public class AmmunitionConundrum {
 		int ran = (int)(Math.random()*curPlayers.size());
 		specials.add(curPlayers.remove(ran));
 
-		ran = (int)(Math.random()*curPlayers.size());
-		protecteds.add(curPlayers.remove(ran));
+//		ran = (int)(Math.random()*curPlayers.size());
+//		protecteds.add(curPlayers.remove(ran));
 
 		for (Player p: curPlayers){
 			normals.add(p);

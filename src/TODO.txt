@@ -1,0 +1,32 @@
+AmmunitionConundrum
+- Moderator Checks
+- Don't drop items
+- No mobs
+- Calling Next on roundActive
+- Cleanup commands
+- Better Colors
+- IO, save settings
+- Scoreboard/Title text
+	- New Game Printout
+- Print Info
+- Reverse Armor
+- Better Method for Assigning Roles
+- Special
+	- Snowball Damaage
+	- No bullets actually doesn't shoot
+	- Normals/Protecteds can't shoot
+- Better Kill messsage involving player names -- printoutto console involving lists of players
+    - /reveal
+- Spawn Locations
+- Freeze Player/Fade in/No attack time
+- Time Set 0 Constant
+- Food Constant
+- Adding Non-existant players check
+- Tell protectors their role
+- Death Messages/Killfeed
+- Managing Multiple Games
+	- Fix overlapping games
+	- ArrayList of all games
+	- remove directly removes from this list
+Sticks still kill after rounds - check for roundActive
+- Killing Deflector doesn't win game
