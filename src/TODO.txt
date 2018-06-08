@@ -1,6 +1,8 @@
 AmmunitionConundrum
-- Commands for default weapons activated
-	- 
+Quick Fixes:
+
+
+To add:
 - Scoreboard/Title text
 	- New Game Printout
 - Special
@@ -10,7 +12,6 @@ AmmunitionConundrum
 - Better Kill messsage involving player names -- printoutto console involving lists of players
     - /reveal
 - Print Info - moderator, current players
-- Reverse Armor
 - Better Method for Assigning Roles
 - Freeze Player/Fade in/No attack time
 - Tell protectors their role

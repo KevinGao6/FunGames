@@ -27,7 +27,7 @@ public class AmmunitionConundrum {
 	/**
 	 * Default armor of each player
 	 */
-	private static final ItemStack[] DEFAULT_ARMOR = {new ItemStack(Material.IRON_HELMET, 1), new ItemStack(Material.IRON_CHESTPLATE, 1), new ItemStack(Material.IRON_LEGGINGS, 1), new ItemStack(Material.IRON_BOOTS, 1)};
+	private static final ItemStack[] DEFAULT_ARMOR = {new ItemStack(Material.IRON_BOOTS, 1), new ItemStack(Material.IRON_LEGGINGS, 1), new ItemStack(Material.IRON_CHESTPLATE, 1), new ItemStack(Material.IRON_HELMET, 1)};
 
 	/**
 	 * Default weapon of each player
@@ -128,6 +128,7 @@ public class AmmunitionConundrum {
 		alives = new ArrayList<Player>();
 		deads = new ArrayList<Player>();
 		roundActive = false;
+		hasBoolay = false;
 		this.tellModerator("New AC Game Created.");
 	}
 
@@ -223,6 +224,13 @@ public class AmmunitionConundrum {
 
 		this.tellModerator("All players removed.");
 	}
+	
+	/**
+	 * @return whether or not a round is active
+	 */
+	public boolean getRoundActive(){
+		return roundActive;
+	}
 
 	/**
 	 * Activates the next round in this Ammunition Conundrum game
@@ -235,6 +243,7 @@ public class AmmunitionConundrum {
 		}
 		
 		generateRoles();
+		hasBoolay = true;
 
 		ItemStack DEFAULT_WEAPON = new ItemStack(DEFAULT_MELEE, 1);
 		DEFAULT_WEAPON.addEnchantment(Enchantment.DAMAGE_ALL, DEFAULT_SHARPNESS_LEVEL);
@@ -266,6 +275,7 @@ public class AmmunitionConundrum {
 			inventory.addItem(DEFAULT_FUN);
 		}
 
+		server.broadcastMessage("" + ChatColor.GOLD + ChatColor.BOLD + "New Round Started!");
 		roundActive = true;
 	}
 
@@ -405,14 +415,14 @@ public class AmmunitionConundrum {
 	}
 
 	/**
-	 * Called at the end of a round when a singular player has won
+	 * Called at the end of a round
 	 */
-	private void roundOver(){
+	public void roundOver(){
 		roundActive = false;
 		server.broadcastMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "Round Over!");
 		if (alives.size() > 0)
 			server.broadcastMessage("" + ChatColor.AQUA + ChatColor.BOLD + alives.get(0).getDisplayName() + " is the winner!");
-
+		hasBoolay = false;
 	}
 
 	/**

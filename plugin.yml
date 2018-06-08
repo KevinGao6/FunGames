@@ -4,10 +4,14 @@ version: 0.1
 description: Implements a fun gamemode
 commands:
   AC: 
-    usage: /<command> [create|removeAll|next|set|remove|add|delete] [Player]
+    usage: /<command> [create|removeall|next|set|remove|add|delete|over] [Player]
     description: Commands for the Ammunition Conundrum Game
     aliases: [AmmunitionConundrum]
   delmobs:
     usage: /<command>
     description: Kills all living entities in all worlds except players. Warning! Resource-heavy and cannot be undone.
     aliases: [killmobs, deletemobs]
+  delitems:
+    usage: /<command>
+    description: Deletes all the dropped items in all worlds. Warning! Resource-heavy and cannot be undone.
+    aliases: [deleteitems]

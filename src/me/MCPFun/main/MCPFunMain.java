@@ -82,7 +82,7 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 			}
 
 			if (args.length == 0){
-				sender.sendMessage(ChatColor.LIGHT_PURPLE + "Commands: create/add/set/remove/removeAll/next/delete");
+				sender.sendMessage(ChatColor.LIGHT_PURPLE + "Commands: create/add/set/remove/removeAll/next/delete/over");
 				return true;
 			}
 
@@ -97,7 +97,6 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 					else {
 						gameAC = new AmmunitionConundrum(server, null);
 					}
-					sender.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Started the Gamemode");
 				} 
 				else {
 					sender.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "An AC Game already exists. Please delete the previous instance before creating a new one.");
@@ -169,7 +168,7 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 			}
 
 			// /AC removeall
-			else if (arg0.equals("removeAll")){
+			else if (arg0.equals("removeall")){
 				gameAC.removeAllPlayers();
 			}
 
@@ -177,11 +176,22 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 			else if (arg0.equals("next")){
 				gameAC.nextRound();
 			}
+
+			// /AC over
+			else if (arg0.equals("over")){
+				if (gameAC.getRoundActive())
+					gameAC.roundOver();
+			}
 		}
 
 		//deletemobs
 		else if (sender.isOp() && cmdName.equals("delmobs")){
 			UtilityCommands.deleteMobs(server);
+		}
+
+		//deleteitems
+		else if (sender.isOp() && cmdName.equals("delitems")){
+			UtilityCommands.deleteItems(server);
 		}
 
 		return true;
@@ -261,7 +271,11 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 	@EventHandler
 	public void onFoodChange(FoodLevelChangeEvent event){
 		if(gameAC != null){
-			((Player)(event.getEntity())).setFoodLevel(15);
+			Player victim = ((Player)(event.getEntity()));
+			victim.setFoodLevel(20);
+			victim.sendMessage("We reset your food.");
+			event.setCancelled(true);
+
 		}
 	}
 

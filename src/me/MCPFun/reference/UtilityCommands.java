@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.bukkit.Server;
 import org.bukkit.World;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
@@ -30,4 +32,19 @@ public class UtilityCommands {
 		}
 	}
 
+	/**
+	 * Deletes all the dropped items on the given server
+	 * Warning: Resource heavy & cannot be undone.
+	 * @param server
+	 */
+	public static void deleteItems(Server server){
+		List<World> worlds = server.getWorlds();
+		for (World w: worlds){
+			List<Entity> ents = w.getEntities();
+			for (Entity e: ents){
+				if (e instanceof Item)
+					e.remove();
+			}
+		}
+	}
 }
