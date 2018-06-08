@@ -1,8 +1,6 @@
 AmmunitionConundrum
-- Don't drop items
-- No mobs
-- Time Set 0 Constant
-- Food Constant
+- Commands for default weapons activated
+	- 
 - Scoreboard/Title text
 	- New Game Printout
 - Special
@@ -25,6 +23,6 @@ AmmunitionConundrum
 - Killing Deflector doesn't win game
 - Better Colors
 - IO, save settings
-
+- Point System
 - Spawn Locations
 

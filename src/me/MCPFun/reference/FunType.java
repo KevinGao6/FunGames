@@ -10,7 +10,7 @@ import org.bukkit.Material;
  */
 public enum FunType {
 	
-	GOLD (Material.STICK, 100, ChatColor.DARK_PURPLE),
+//	GOLD (Material.STICK, 100, ChatColor.DARK_PURPLE),
 	CLASSIC_FUN (Material.IRON_AXE, 5, ChatColor.AQUA),
 	GOLDEN_FUN (Material.DIAMOND_AXE, 1000, ChatColor.DARK_PURPLE);
 	

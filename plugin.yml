@@ -7,3 +7,7 @@ commands:
     usage: /<command> [create|removeAll|next|set|remove|add|delete] [Player]
     description: Commands for the Ammunition Conundrum Game
     aliases: [AmmunitionConundrum]
+  delmobs:
+    usage: /<command>
+    description: Kills all living entities in all worlds except players. Warning! Resource-heavy and cannot be undone.
+    aliases: [killmobs, deletemobs]

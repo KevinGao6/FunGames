@@ -12,7 +12,9 @@ import org.bukkit.entity.Snowball;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.PluginManager;
@@ -20,6 +22,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import me.MCPFun.gamemodes.AmmunitionConundrum;
 import me.MCPFun.reference.FunType;
+import me.MCPFun.reference.UtilityCommands;
 
 /**
  * This class represents the main class for this JavaPlugin
@@ -175,6 +178,12 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 				gameAC.nextRound();
 			}
 		}
+
+		//deletemobs
+		else if (sender.isOp() && cmdName.equals("delmobs")){
+			UtilityCommands.deleteMobs(server);
+		}
+
 		return true;
 	}
 
@@ -247,5 +256,19 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 	public void onDeath(PlayerDeathEvent e){
 		if (gameAC != null)
 			gameAC.death(e);
+	}
+
+	@EventHandler
+	public void onFoodChange(FoodLevelChangeEvent event){
+		if(gameAC != null){
+			((Player)(event.getEntity())).setFoodLevel(15);
+		}
+	}
+
+	@EventHandler
+	public void onCreatureSpawn(CreatureSpawnEvent event) {
+		if(gameAC != null){
+			event.setCancelled(true);
+		}
 	}
 }

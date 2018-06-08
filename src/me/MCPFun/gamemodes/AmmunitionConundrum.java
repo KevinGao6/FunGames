@@ -245,6 +245,12 @@ public class AmmunitionConundrum {
 			//Set players to adventure mode
 			p.setGameMode(GameMode.ADVENTURE);
 
+			//Set players to full health
+			p.setHealth(20.0);
+			
+			//Set player to full food
+			p.setFoodLevel(15);
+			
 			PlayerInventory inventory = p.getInventory();
 
 			//Clear Inventory
@@ -391,6 +397,8 @@ public class AmmunitionConundrum {
 			deads.add(p);
 			alives.remove(p);
 
+			e.getDrops().clear();
+			
 			if (alives.size() <= 1)
 				roundOver();
 		}
