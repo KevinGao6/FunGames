@@ -152,7 +152,12 @@ public class AmmunitionConundrum {
 	public void setModerator(Player p){
 		//Invalid Player to set as moderator
 		if (p == null){
-			this.tellModerator("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Could not find Player.");
+			this.tellModerator("Could not find Player.");
+			return;
+		}
+		
+		if (!p.isOp()){
+			this.tellModerator("Player not eligble for moderator");
 			return;
 		}
 		
@@ -258,7 +263,7 @@ public class AmmunitionConundrum {
 			p.setHealth(20.0);
 			
 			//Set player to full food
-			p.setFoodLevel(15);
+			p.setFoodLevel(20);
 			
 			PlayerInventory inventory = p.getInventory();
 
@@ -286,7 +291,9 @@ public class AmmunitionConundrum {
 		normals = new ArrayList<Player>();
 		specials = new ArrayList<Player>();
 		protecteds = new ArrayList<Player>();
-
+		deads = new ArrayList<Player>();
+		alives = new ArrayList<Player>();
+		
 		ArrayList<Player> curPlayers = new ArrayList<Player>(players.size());
 		for (Player p: players){
 
@@ -375,6 +382,13 @@ public class AmmunitionConundrum {
 			System.out.println("Something is amiss");
 			return;
 		}
+		
+		if (ent instanceof Player && victim instanceof Player){
+			if (deads.contains((Player)(ent)) || deads.contains((Player)(ent))){
+				((Player)(ent)).sendMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "Attacking this player is not allowed.");
+				e.setCancelled(true);
+			}
+		}
 
 		//If the damager is a snowball shot by a player
 		if (ent instanceof Snowball && ((Snowball)ent).getShooter() instanceof Player && ((Player)victim) instanceof Player){
@@ -420,9 +434,12 @@ public class AmmunitionConundrum {
 	public void roundOver(){
 		roundActive = false;
 		server.broadcastMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "Round Over!");
-		if (alives.size() > 0)
+		if (alives.size() == 1)
 			server.broadcastMessage("" + ChatColor.AQUA + ChatColor.BOLD + alives.get(0).getDisplayName() + " is the winner!");
 		hasBoolay = false;
+		
+		for (Player p : players)
+			p.getInventory().clear();
 	}
 
 	/**

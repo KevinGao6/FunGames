@@ -75,11 +75,13 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 
 		String cmdName = cmd.getName();
 
+		//OP COMMANDS FROM HERE ON OUT
+		if (!sender.isOp()){
+			sender.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "You do not have permission to use this command.");
+			return true;
+		}
+		
 		if (cmdName.equals("AC")){
-
-			if (!sender.isOp()){
-				sender.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "You do not have permission to use this command.");
-			}
 
 			if (args.length == 0){
 				sender.sendMessage(ChatColor.LIGHT_PURPLE + "Commands: create/add/set/remove/removeAll/next/delete/over");
@@ -185,13 +187,15 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 		}
 
 		//deletemobs
-		else if (sender.isOp() && cmdName.equals("delmobs")){
+		else if (cmdName.equals("delmobs")){
 			UtilityCommands.deleteMobs(server);
+			sender.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Deleting all mobs...");
 		}
 
 		//deleteitems
-		else if (sender.isOp() && cmdName.equals("delitems")){
+		else if (cmdName.equals("delitems")){
 			UtilityCommands.deleteItems(server);
+			sender.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Deleting all dropped items...");
 		}
 
 		return true;
@@ -273,7 +277,6 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 		if(gameAC != null){
 			Player victim = ((Player)(event.getEntity()));
 			victim.setFoodLevel(20);
-			victim.sendMessage("We reset your food.");
 			event.setCancelled(true);
 
 		}

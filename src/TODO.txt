@@ -1,14 +1,10 @@
 AmmunitionConundrum
 Quick Fixes:
-
+Give players a nonsense weapon for fun
 
 To add:
 - Scoreboard/Title text
 	- New Game Printout
-- Special
-	- Snowball Damaage
-	- No bullets actually doesn't shoot
-	- Normals/Protecteds can't shoot
 - Better Kill messsage involving player names -- printoutto console involving lists of players
     - /reveal
 - Print Info - moderator, current players
@@ -26,4 +22,4 @@ To add:
 - IO, save settings
 - Point System
 - Spawn Locations
-
+- Better reset food that's not once per .5 secs
