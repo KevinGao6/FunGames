@@ -3,6 +3,21 @@ main: me.MCPFun.main.MCPFunMain
 version: 0.1
 description: Implements a fun gamemode
 commands:
-     start:
-          usage: /<commmand>
-          description: Starts the gamemode
+  create:
+    usage: /<commmand>
+    description: Creates an AC Game
+  removeAll:
+    usage: /<commmand>
+    description: Removes all players from the AC Game
+  next:
+    usage: /<commmand>
+    description: Starts the next round of the AC Game
+  set:
+    usage: /<commmand> [player]
+    description: Sets the moderator of the AC Game
+  remove:
+    usage: /<commmand> [player]
+    description: Removes the given player from the AC Game
+  add:
+    usage: /<commmand> [player]
+    description: Adds the given player to the AC Game

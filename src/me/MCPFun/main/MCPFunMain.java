@@ -3,6 +3,7 @@ package me.MCPFun.main;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
@@ -12,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -32,7 +34,7 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 	private static final double speed = 999;
 
 	/**Command to start the randomization process*/
-	private static final String start = "start";
+	private static final String create = "create";
 
 	/**Plugin Manager for this Plugin*/
 	private static PluginManager pluginManager;
@@ -41,6 +43,11 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 	 * Current AC Game
 	 */
 	private AmmunitionConundrum gameAC;
+	
+	/**
+	 * This CraftBukkit Server
+	 */
+	private Server server;
 
 	/**
 	 * Automatically run when this plugin is enabled
@@ -48,6 +55,7 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 	@Override
 	public void onEnable(){
 		System.out.println("Enabling event listener for " + name + "...");
+		server = Bukkit.getServer();
 		pluginManager = Bukkit.getServer().getPluginManager();
 		pluginManager.registerEvents(this, this);
 		System.out.println("Success! " + name + " loaded!");
@@ -61,13 +69,42 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 		System.out.println("Disabling Plugin " + this.getClass().getName() + "...");
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args){
 
 		System.out.println(sender.getClass().getName());
 
-		if (cmd.getName().equals(start)){
+		//TODO: Cleanup
+		String cmdName = cmd.getName();
+		
+		if (cmdName.equals(create)){
+			gameAC = new AmmunitionConundrum(server, (Player)sender);
 			sender.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "Started the Gamemode");
+		}
+		
+		else if (gameAC == null){
+			sender.sendMessage(ChatColor.RED + "No AC game exists!");
+		}
+		
+		else if (cmdName.equals("set")){
+			gameAC.setModerator(server.getPlayer(args[0]));
+		}
+		
+		else if (cmdName.equals("add")){
+			gameAC.addPlayer(server.getPlayer(args[0]));
+		}
+		
+		else if (cmdName.equals("remove")){
+			gameAC.removePlayer(server.getPlayer(args[0]));
+		}
+		
+		else if (cmdName.equals("removeAll")){
+			gameAC.removeAllPlayers();
+		}
+		
+		else if (cmdName.equals("next")){
+			gameAC.nextRound();
 		}
 
 
@@ -137,5 +174,11 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 				}
 			}
 		}
+	}
+	
+	@EventHandler
+	public void onDeath(PlayerDeathEvent e){
+		if (gameAC != null)
+			gameAC.death(e);
 	}
 }

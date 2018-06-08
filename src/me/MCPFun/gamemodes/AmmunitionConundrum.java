@@ -18,8 +18,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-import me.MCPFun.reference.FunType;
-
 /**
  * The first, original gamemode of the server
  * @author Kevin
@@ -228,6 +226,8 @@ public class AmmunitionConundrum {
 			//Give weapon
 			inventory.addItem(DEFAULT_FUN);
 		}
+		
+		roundActive = true;
 	}
 
 	/**
@@ -266,6 +266,10 @@ public class AmmunitionConundrum {
 	 * Called when a player in an AC Game interacts with anything
 	 */
 	public void shoot(PlayerInteractEvent e){
+		
+		if(!roundActive)
+			return;
+		
 		//Null checks
 		if (e == null || e.getItem() == null)
 			return;
@@ -308,6 +312,8 @@ public class AmmunitionConundrum {
 
 	@SuppressWarnings("deprecation")
 	public void hit(EntityDamageByEntityEvent e){
+		if(!roundActive)
+			return;
 		
 		if (e == null)
 			return;
@@ -342,6 +348,10 @@ public class AmmunitionConundrum {
 	 * @param e the PlayerDeath Event
 	 */
 	public void death(PlayerDeathEvent e){
+		
+		if(!roundActive)
+			return;
+		
 		Player p = e.getEntity();
 		if (alives.contains(p)){
 			deads.add(p);
@@ -356,6 +366,7 @@ public class AmmunitionConundrum {
 	 * Called at the end of a round when a singular player has won
 	 */
 	private void roundOver(){
+		roundActive = false;
 		server.broadcastMessage("" + ChatColor.BOLD + ChatColor.DARK_RED + "Round Over!");
 		if (alives.size() > 0)
 			server.broadcastMessage("" + ChatColor.BOLD + ChatColor.AQUA + alives.get(0).getDisplayName() + " is the winner!");
