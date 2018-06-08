@@ -1,7 +1,6 @@
 package me.MCPFun.gamemodes;
 
 import java.util.ArrayList;
-import java.util.TreeSet;
 
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -61,14 +60,19 @@ public class AmmunitionConundrum {
 	private static final int DEFAULT_MISFIRE_LENGTH = 10;
 
 	/**
+	 * Ticks which a normal player is set aflame if he/she misfires
+	 */
+	private static final int MAX_PLAYERS = 4;
+
+	/**
 	 * This current server
 	 */
 	private Server server;
-	
+
 	/**
 	 * Treeset of all participating players
 	 */
-	private TreeSet<Player> players;
+	private ArrayList<Player> players;
 
 	/**
 	 * The moderator of the game - can be a participating player
@@ -116,7 +120,7 @@ public class AmmunitionConundrum {
 	 */
 	public AmmunitionConundrum(Server server, Player moderator){
 		this.server = server;
-		players = new TreeSet<Player>();
+		players = new ArrayList<Player>();
 		this.moderator = moderator;
 		normals = new ArrayList<Player>();
 		specials = new ArrayList<Player>();
@@ -124,6 +128,7 @@ public class AmmunitionConundrum {
 		alives = new ArrayList<Player>();
 		deads = new ArrayList<Player>();
 		roundActive = false;
+		this.tellModerator("New AC Game Created.");
 	}
 
 	/**
@@ -144,9 +149,9 @@ public class AmmunitionConundrum {
 	 * @param p the new moderator
 	 */
 	public void setModerator(Player p){
-		this.moderator.sendMessage("You are no longer the moderator for this AmmunitionConundrum game.");
+		this.tellModerator("You are no longer the moderator for this AmmunitionConundrum game.");
 		this.moderator = p;
-		this.moderator.sendMessage("You are the new moderator for this AmmunitionConundrum game.");
+		this.tellModerator("You are the new moderator for this AmmunitionConundrum game.");
 
 	}
 
@@ -158,17 +163,23 @@ public class AmmunitionConundrum {
 	}
 
 	/**
-	 * PRECONDITION: No more than 3 players already in game
+	 * PRECONDITION: No more than MAX_PLAYERS players already in game
 	 * @param p the new player
 	 */
 	public void addPlayer(Player p){
-		if (players.size() < 4){
-			players.add(p);
-			this.moderator.sendMessage(p.getDisplayName() + " was added to the group");
+		if (players.size() >= MAX_PLAYERS){
+			this.tellModerator("Too many existing players. Please remove a player before adding another.");
 			return;
 		}
 
-		this.moderator.sendMessage("Too many existing players. Please remove a player before adding another.");
+		if (!players.contains(p)){
+			this.tellModerator("Player already in game.");
+			return;
+		}
+		
+		players.add(p);
+		this.tellModerator(p.getDisplayName() + " was added to the group");
+
 	}
 
 	/**
@@ -178,11 +189,11 @@ public class AmmunitionConundrum {
 	 */
 	public boolean removePlayer(Player p){
 		if (p != null && players.contains(p)){
-			this.moderator.sendMessage(p.getDisplayName() + " was removed from the game.");
+			this.tellModerator(p.getDisplayName() + " was removed from the game.");
 			return players.remove(p);
 		}
 
-		this.moderator.sendMessage("Invalid player to remove.");
+		this.tellModerator("Invalid player to remove.");
 		return false;
 	}
 
@@ -194,7 +205,7 @@ public class AmmunitionConundrum {
 		for (Player p: players)
 			players.remove(p);
 
-		this.moderator.sendMessage("All players removed.");
+		this.tellModerator("All players removed.");
 	}
 
 	/**
@@ -226,7 +237,7 @@ public class AmmunitionConundrum {
 			//Give weapon
 			inventory.addItem(DEFAULT_FUN);
 		}
-		
+
 		roundActive = true;
 	}
 
@@ -266,10 +277,10 @@ public class AmmunitionConundrum {
 	 * Called when a player in an AC Game interacts with anything
 	 */
 	public void shoot(PlayerInteractEvent e){
-		
+
 		if(!roundActive)
 			return;
-		
+
 		//Null checks
 		if (e == null || e.getItem() == null)
 			return;
@@ -314,13 +325,13 @@ public class AmmunitionConundrum {
 	public void hit(EntityDamageByEntityEvent e){
 		if(!roundActive)
 			return;
-		
+
 		if (e == null)
 			return;
-		
+
 		Entity ent = e.getDamager();
 		Entity victim = e.getEntity();
-		
+
 		if (ent == null || victim == null){
 			System.out.println("Something is amiss");
 			return;
@@ -330,38 +341,38 @@ public class AmmunitionConundrum {
 		if (ent instanceof Snowball && ((Snowball)ent).getShooter() instanceof Player && ((Player)victim) instanceof Player){
 			Player shooter = (Player)(((Snowball)ent).getShooter());			
 			Player shotted = ((Player)victim);
-			
+
 			if (protecteds.contains(shotted)){
 				shooter.damage(1000.0);
 				shooter.sendMessage(ChatColor.RED + "You shot the deflector!");
 			}
-			
+
 			else{
 				shotted.damage(1000.0);
 				shotted.sendMessage(ChatColor.RED + "You were killed by the shooter's sole bullet!");
 			}
 		}
 	}
-	
+
 	/**
 	 * Called whenever a player dies
 	 * @param e the PlayerDeath Event
 	 */
 	public void death(PlayerDeathEvent e){
-		
+
 		if(!roundActive)
 			return;
-		
+
 		Player p = e.getEntity();
 		if (alives.contains(p)){
 			deads.add(p);
 			alives.remove(p);
-			
+
 			if (alives.size() <= 1)
 				roundOver();
 		}
 	}
-	
+
 	/**
 	 * Called at the end of a round when a singular player has won
 	 */
@@ -380,5 +391,13 @@ public class AmmunitionConundrum {
 	private void misfire(Player p){
 		p.damage(DEFAULT_MISFIRE_DAMAGE);
 		p.setFireTicks(DEFAULT_MISFIRE_LENGTH);
+	}
+
+	/**
+	 * Sends a bold, light_purple message directly to the moderator of this AC game
+	 * @param msg
+	 */
+	private void tellModerator(String msg){
+		this.moderator.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + msg);
 	}
 }
