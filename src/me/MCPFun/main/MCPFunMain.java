@@ -33,9 +33,6 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 	/**Speed of snowballs*/
 	private static final double speed = 999;
 
-	/**Command to start the randomization process*/
-	private static final String create = "create";
-
 	/**Plugin Manager for this Plugin*/
 	private static PluginManager pluginManager;
 
@@ -43,7 +40,7 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 	 * Current AC Game
 	 */
 	private AmmunitionConundrum gameAC;
-	
+
 	/**
 	 * This CraftBukkit Server
 	 */
@@ -73,41 +70,111 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args){
 
-		System.out.println(sender.getClass().getName());
-
-		//TODO: Cleanup
 		String cmdName = cmd.getName();
-		
-		if (cmdName.equals(create)){
-			gameAC = new AmmunitionConundrum(server, (Player)sender);
-			sender.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "Started the Gamemode");
-		}
-		
-		else if (gameAC == null){
-			sender.sendMessage(ChatColor.RED + "No AC game exists!");
-		}
-		
-		else if (cmdName.equals("set")){
-			gameAC.setModerator(server.getPlayer(args[0]));
-		}
-		
-		else if (cmdName.equals("add")){
-			gameAC.addPlayer(server.getPlayer(args[0]));
-		}
-		
-		else if (cmdName.equals("remove")){
-			gameAC.removePlayer(server.getPlayer(args[0]));
-		}
-		
-		else if (cmdName.equals("removeAll")){
-			gameAC.removeAllPlayers();
-		}
-		
-		else if (cmdName.equals("next")){
-			gameAC.nextRound();
-		}
 
+		if (cmdName.equals("AC")){
 
+			if (!sender.isOp()){
+				sender.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "You do not have permission to use this command.");
+			}
+
+			if (args.length == 0){
+				sender.sendMessage(ChatColor.LIGHT_PURPLE + "Commands: create/add/set/remove/removeAll/next/delete");
+				return true;
+			}
+
+			String arg0 = args[0];
+
+			// /AC create
+			if (arg0.equals("create")){
+				if (gameAC == null){
+					if (sender instanceof Player){
+						gameAC = new AmmunitionConundrum(server, (Player)sender);
+					}
+					else {
+						gameAC = new AmmunitionConundrum(server, null);
+					}
+					sender.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Started the Gamemode");
+				} 
+				else {
+					sender.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "An AC Game already exists. Please delete the previous instance before creating a new one.");
+				}
+			}
+
+			//Null check for game AC
+			else if (gameAC == null){
+				sender.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "No AC Game Exists!");
+				return true;
+			}
+
+			//Moderator Check for game AC
+			else if (!(sender instanceof Player) || !sender.equals(gameAC.getModerator())){
+				sender.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "You are not the moderator for this AC Game.");
+				return true;
+			}
+
+			// /AC delete
+			else if (arg0.equals("delete")){
+				gameAC = null;
+				sender.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "AC Game deleted.");
+
+			}
+
+			// /AC set <Player>
+			else if (arg0.equals("set")){
+
+				//Invalid Number of args
+				if (args.length != 2){
+					sender.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Usage: /AC set <Player>");
+				} 
+
+				//Valid Number of args
+				else {
+					Player p = server.getPlayer(args[1]);
+					gameAC.setModerator(p);
+
+				}
+			}
+
+			// /AC add <Player>
+			else if (arg0.equals("add")){
+				//Invalid Number of args
+				if (args.length != 2){
+					sender.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Usage: /AC add <Player>");
+				} 
+
+				//Valid Number of args
+				else {
+					Player p = server.getPlayer(args[1]);
+					gameAC.addPlayer(p);
+
+				}
+			}
+
+			// /AC remove <Player>
+			else if (arg0.equals("remove")){
+				//Invalid Number of args
+				if (args.length != 2){
+					sender.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Usage: /AC remove <Player>");
+				} 
+
+				//Valid Number of args
+				else {
+					Player p = server.getPlayer(args[1]);
+					gameAC.removePlayer(p);
+				}
+			}
+
+			// /AC removeall
+			else if (arg0.equals("removeAll")){
+				gameAC.removeAllPlayers();
+			}
+
+			// /AC next
+			else if (arg0.equals("next")){
+				gameAC.nextRound();
+			}
+		}
 		return true;
 	}
 
@@ -128,7 +195,7 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 		Action a = e.getAction();
 		Material m = e.getItem().getType();
 		Player p = e.getPlayer();
-		
+
 		//Playe right clicks anything
 		if (a.equals(Action.RIGHT_CLICK_AIR) || a.equals(Action.RIGHT_CLICK_BLOCK)){
 			//Check for valid weapon and shoot projectile
@@ -175,7 +242,7 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 			}
 		}
 	}
-	
+
 	@EventHandler
 	public void onDeath(PlayerDeathEvent e){
 		if (gameAC != null)

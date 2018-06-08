@@ -57,7 +57,7 @@ public class AmmunitionConundrum {
 	/**
 	 * Ticks which a normal player is set aflame if he/she misfires
 	 */
-	private static final int DEFAULT_MISFIRE_LENGTH = 10;
+	private static final int DEFAULT_MISFIRE_LENGTH_TICKS = 10;
 
 	/**
 	 * Ticks which a normal player is set aflame if he/she misfires
@@ -149,6 +149,12 @@ public class AmmunitionConundrum {
 	 * @param p the new moderator
 	 */
 	public void setModerator(Player p){
+		//Invalid Player to set as moderator
+		if (p == null){
+			this.tellModerator("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Could not find Player.");
+			return;
+		}
+		
 		this.tellModerator("You are no longer the moderator for this AmmunitionConundrum game.");
 		this.moderator = p;
 		this.tellModerator("You are the new moderator for this AmmunitionConundrum game.");
@@ -172,23 +178,34 @@ public class AmmunitionConundrum {
 			return;
 		}
 
+		if (p == null){
+			this.tellModerator("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Could not find Player.");
+			return;
+		}
+
 		if (players.contains(p)){
 			this.tellModerator("Player already in game.");
 			return;
 		}
-		
+
 		players.add(p);
 		this.tellModerator(p.getDisplayName() + " was added to the group");
 
 	}
 
 	/**
-	 * PRECONDITION: Player p is a participant
+	 * This method checks itself to see if the player is a participant
 	 * @param p the player to remove
 	 * @return whether or not removal was successful
 	 */
 	public boolean removePlayer(Player p){
-		if (p != null && players.contains(p)){
+		
+		if (p == null){
+			this.tellModerator("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Could not find Player.");
+			return false;
+		}
+		
+		if (players.contains(p)){
 			this.tellModerator(p.getDisplayName() + " was removed from the game.");
 			return players.remove(p);
 		}
@@ -256,12 +273,13 @@ public class AmmunitionConundrum {
 			alives.add(p);
 		}
 
-		//TODO: Better method of sorting people
-		int ran = (int)(Math.random()*curPlayers.size());
-		specials.add(curPlayers.remove(ran));
+		if (curPlayers.size() >= 2){
+			int ran = (int)(Math.random()*curPlayers.size());
+			specials.add(curPlayers.remove(ran));
 
-//		ran = (int)(Math.random()*curPlayers.size());
-//		protecteds.add(curPlayers.remove(ran));
+			ran = (int)(Math.random()*curPlayers.size());
+			protecteds.add(curPlayers.remove(ran));
+		}
 
 		for (Player p: curPlayers){
 			normals.add(p);
@@ -377,9 +395,9 @@ public class AmmunitionConundrum {
 	 */
 	private void roundOver(){
 		roundActive = false;
-		server.broadcastMessage("" + ChatColor.BOLD + ChatColor.DARK_RED + "Round Over!");
+		server.broadcastMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "Round Over!");
 		if (alives.size() > 0)
-			server.broadcastMessage("" + ChatColor.BOLD + ChatColor.AQUA + alives.get(0).getDisplayName() + " is the winner!");
+			server.broadcastMessage("" + ChatColor.AQUA + ChatColor.BOLD + alives.get(0).getDisplayName() + " is the winner!");
 
 	}
 
@@ -389,7 +407,7 @@ public class AmmunitionConundrum {
 	 */
 	private void misfire(Player p){
 		p.damage(DEFAULT_MISFIRE_DAMAGE);
-		p.setFireTicks(DEFAULT_MISFIRE_LENGTH);
+		p.setFireTicks(DEFAULT_MISFIRE_LENGTH_TICKS);
 	}
 
 	/**
@@ -397,6 +415,11 @@ public class AmmunitionConundrum {
 	 * @param msg
 	 */
 	private void tellModerator(String msg){
-		this.moderator.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + msg);
+		if (moderator == null){
+			System.out.println("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + msg);
+		}
+		else {
+			this.moderator.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + msg);
+		}
 	}
 }

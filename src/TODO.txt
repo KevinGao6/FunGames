@@ -15,14 +15,9 @@ AmmunitionConundrum
 	- Normals/Protecteds can't shoot
 - Better Kill messsage involving player names -- printoutto console involving lists of players
     - /reveal
-
-- Better Colors
-- IO, save settings
-- Print Info
+- Print Info - moderator, current players
 - Reverse Armor
 - Better Method for Assigning Roles
-
-- Spawn Locations
 - Freeze Player/Fade in/No attack time
 - Tell protectors their role
 - Death Messages/Killfeed
@@ -30,5 +25,10 @@ AmmunitionConundrum
 	- Fix overlapping games
 	- ArrayList of all games
 	- remove directly removes from this list
-Sticks still kill after rounds - check for roundActive
+- Sticks still kill after rounds - check for roundActive
 - Killing Deflector doesn't win game
+- Better Colors
+- IO, save settings
+
+- Spawn Locations
+
