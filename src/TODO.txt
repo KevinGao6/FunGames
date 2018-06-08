@@ -1,14 +1,10 @@
 AmmunitionConundrum
-- Cleanup commands
-- Moderator Checks
 - Don't drop items
 - No mobs
 - Time Set 0 Constant
 - Food Constant
-- Adding Non-existant players check
 - Scoreboard/Title text
 	- New Game Printout
-- Calling Next on roundActive
 - Special
 	- Snowball Damaage
 	- No bullets actually doesn't shoot

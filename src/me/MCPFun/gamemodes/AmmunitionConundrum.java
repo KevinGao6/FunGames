@@ -228,6 +228,12 @@ public class AmmunitionConundrum {
 	 * Activates the next round in this Ammunition Conundrum game
 	 */
 	public void nextRound(){
+		
+		if(roundActive){
+			this.tellModerator("Cannot start new round - A round is currently active");
+			return;
+		}
+		
 		generateRoles();
 
 		ItemStack DEFAULT_WEAPON = new ItemStack(DEFAULT_MELEE, 1);
