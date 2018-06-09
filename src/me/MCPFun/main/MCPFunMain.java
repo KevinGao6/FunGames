@@ -121,7 +121,8 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 			else if (arg0.equals("delete")){
 				gameAC = null;
 				sender.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "AC Game deleted.");
-
+				server.broadcastMessage("" + ChatColor.GOLD + "Re-enabling Mob spawning...");
+				server.broadcastMessage("" + ChatColor.GOLD + "Un-locking Players' foodLevels...");
 			}
 
 			// /AC set <Player>
@@ -183,6 +184,13 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 			else if (arg0.equals("over")){
 				if (gameAC.getRoundActive())
 					gameAC.roundOver();
+			}
+			
+			// /AC info
+			else if (arg0.equals("info")){
+				if (gameAC.getRoundActive()){
+					gameAC.showInfo();
+				}
 			}
 		}
 

@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Snowball;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
@@ -129,6 +130,8 @@ public class AmmunitionConundrum {
 		deads = new ArrayList<Player>();
 		roundActive = false;
 		hasBoolay = false;
+		server.broadcastMessage("" + ChatColor.GOLD + "Disabling Mob spawning...");
+		server.broadcastMessage("" + ChatColor.GOLD + "Locking Players' foodLevel at 20...");
 		this.tellModerator("New AC Game Created.");
 	}
 
@@ -155,12 +158,12 @@ public class AmmunitionConundrum {
 			this.tellModerator("Could not find Player.");
 			return;
 		}
-		
+
 		if (!p.isOp()){
 			this.tellModerator("Player not eligble for moderator");
 			return;
 		}
-		
+
 		this.tellModerator("You are no longer the moderator for this AmmunitionConundrum game.");
 		this.moderator = p;
 		this.tellModerator("You are the new moderator for this AmmunitionConundrum game.");
@@ -205,12 +208,12 @@ public class AmmunitionConundrum {
 	 * @return whether or not removal was successful
 	 */
 	public boolean removePlayer(Player p){
-		
+
 		if (p == null){
 			this.tellModerator("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Could not find Player.");
 			return false;
 		}
-		
+
 		if (players.contains(p)){
 			this.tellModerator(p.getDisplayName() + " was removed from the game.");
 			return players.remove(p);
@@ -229,7 +232,7 @@ public class AmmunitionConundrum {
 
 		this.tellModerator("All players removed.");
 	}
-	
+
 	/**
 	 * @return whether or not a round is active
 	 */
@@ -241,12 +244,12 @@ public class AmmunitionConundrum {
 	 * Activates the next round in this Ammunition Conundrum game
 	 */
 	public void nextRound(){
-		
+
 		if(roundActive){
 			this.tellModerator("Cannot start new round - A round is currently active");
 			return;
 		}
-		
+
 		generateRoles();
 		hasBoolay = true;
 
@@ -261,10 +264,10 @@ public class AmmunitionConundrum {
 
 			//Set players to full health
 			p.setHealth(20.0);
-			
+
 			//Set player to full food
 			p.setFoodLevel(20);
-			
+
 			PlayerInventory inventory = p.getInventory();
 
 			//Clear Inventory
@@ -280,6 +283,23 @@ public class AmmunitionConundrum {
 			inventory.addItem(DEFAULT_FUN);
 		}
 
+		for (Player p: protecteds){
+			p.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "You are the reflector this round!");
+			p.sendMessage("" + ChatColor.GOLD + "Your stick is for disguising purposes only.");
+			p.sendMessage("" + ChatColor.GOLD + "You can reflect the funman's bullet but you will take extra damage from melee attacks.");
+		}
+
+		for (Player p: normals){
+			p.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "Your role is unknown this round!");
+			p.sendMessage("" + ChatColor.GOLD + "You could be the funman or a normal person.");
+			p.sendMessage("" + ChatColor.GOLD + "Firing your stick might discharge 1 functional shot, or a devastating misfire.");
+		}
+
+		for (Player p: specials){
+			p.sendMessage("" + ChatColor.GOLD + ChatColor.BOLD + "Your role is unknown this round!");
+			p.sendMessage("" + ChatColor.GOLD + "You could be the funman or a normal person.");
+			p.sendMessage("" + ChatColor.GOLD + "Firing your stick might discharge 1 functional shot, or a devastating misfire.");
+		}
 		server.broadcastMessage("" + ChatColor.GOLD + ChatColor.BOLD + "New Round Started!");
 		roundActive = true;
 	}
@@ -293,7 +313,7 @@ public class AmmunitionConundrum {
 		protecteds = new ArrayList<Player>();
 		deads = new ArrayList<Player>();
 		alives = new ArrayList<Player>();
-		
+
 		ArrayList<Player> curPlayers = new ArrayList<Player>(players.size());
 		for (Player p: players){
 
@@ -302,12 +322,17 @@ public class AmmunitionConundrum {
 			alives.add(p);
 		}
 
-		if (curPlayers.size() >= 2){
-			int ran = (int)(Math.random()*curPlayers.size());
-			specials.add(curPlayers.remove(ran));
 
+		int ran = (int)(Math.random()*curPlayers.size());
+		specials.add(curPlayers.remove(ran));
+
+		if (players.size() > 2){
 			ran = (int)(Math.random()*curPlayers.size());
 			protecteds.add(curPlayers.remove(ran));
+		}
+
+		else{
+			this.tellModerator("Play with 3 or more to get optimal experience.");
 		}
 
 		for (Player p: curPlayers){
@@ -382,7 +407,7 @@ public class AmmunitionConundrum {
 			System.out.println("Something is amiss");
 			return;
 		}
-		
+
 		if (ent instanceof Player && victim instanceof Player){
 			if (deads.contains((Player)(ent)) || deads.contains((Player)(ent))){
 				((Player)(ent)).sendMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "Attacking this player is not allowed.");
@@ -397,12 +422,13 @@ public class AmmunitionConundrum {
 
 			if (protecteds.contains(shotted)){
 				shooter.damage(1000.0);
-				shooter.sendMessage(ChatColor.RED + "You shot the deflector!");
+				server.broadcastMessage("" + ChatColor.RED + "The funman shot the reflector and killed themself");
 			}
 
 			else{
 				shotted.damage(1000.0);
-				shotted.sendMessage(ChatColor.RED + "You were killed by the shooter's sole bullet!");
+				server.broadcastMessage("" + ChatColor.RED + "The funman's sole snowball kills a poor victim");
+
 			}
 		}
 	}
@@ -417,12 +443,17 @@ public class AmmunitionConundrum {
 			return;
 
 		Player p = e.getEntity();
+		EntityDamageEvent EDE = p.getLastDamageCause();
 		if (alives.contains(p)){
+			
+			//If the player was killed by a snowball
+			if (!(EDE instanceof EntityDamageByEntityEvent)){
+				e.setDeathMessage(null);
+			}
+
 			deads.add(p);
 			alives.remove(p);
-
 			e.getDrops().clear();
-			
 			if (alives.size() <= 1)
 				roundOver();
 		}
@@ -437,9 +468,29 @@ public class AmmunitionConundrum {
 		if (alives.size() == 1)
 			server.broadcastMessage("" + ChatColor.AQUA + ChatColor.BOLD + alives.get(0).getDisplayName() + " is the winner!");
 		hasBoolay = false;
-		
-		for (Player p : players)
-			p.getInventory().clear();
+
+		for (Player p : players){
+			PlayerInventory inv = p.getInventory();
+			inv.clear();
+			inv.setHelmet(null);
+			inv.setChestplate(null);
+			inv.setLeggings(null);
+			inv.setBoots(null);
+
+		}
+	}
+
+	/**
+	 * Shows this AC Game's info to the moderator
+	 */
+	public void showInfo(){
+		this.tellModerator("Info for this AC Game:");
+		if (this.moderator == null)
+			this.tellModerator("Moderator: Console");
+		else
+			this.tellModerator("Moderator: " + this.moderator.getDisplayName());
+
+		this.tellModerator("Current Players: " + players);
 	}
 
 	/**

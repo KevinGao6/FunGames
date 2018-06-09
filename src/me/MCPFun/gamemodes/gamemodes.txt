@@ -5,5 +5,5 @@ Special
 Normal
 - Bullet that will backfire
 Protected
-- Bullet Deflector, die in one shot to normal person
+- Bullet Deflector, extra damage from melees
 - Knows they are the protected

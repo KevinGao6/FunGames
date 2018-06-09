@@ -1,25 +1,17 @@
 AmmunitionConundrum
 Quick Fixes:
-Give players a nonsense weapon for fun
+
 
 To add:
-- Scoreboard/Title text
-	- New Game Printout
-- Better Kill messsage involving player names -- printoutto console involving lists of players
-    - /reveal
-- Print Info - moderator, current players
-- Better Method for Assigning Roles
-- Freeze Player/Fade in/No attack time
-- Tell protectors their role
-- Death Messages/Killfeed
+- Spawn Locations
+- Scoreboard
+	- Point System
+    
+Give players a nonsense weapon for fun
+
 - Managing Multiple Games
 	- Fix overlapping games
 	- ArrayList of all games
 	- remove directly removes from this list
-- Sticks still kill after rounds - check for roundActive
-- Killing Deflector doesn't win game
 - Better Colors
 - IO, save settings
-- Point System
-- Spawn Locations
-- Better reset food that's not once per .5 secs

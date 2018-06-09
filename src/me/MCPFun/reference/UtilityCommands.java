@@ -2,6 +2,7 @@ package me.MCPFun.reference;
 
 import java.util.List;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
@@ -22,6 +23,7 @@ public class UtilityCommands {
 	 * @param server
 	 */
 	public static void deleteMobs(Server server){
+		server.broadcastMessage("" + ChatColor.GOLD + "Killing all mobs...");
 		List<World> worlds = server.getWorlds();
 		for (World w: worlds){
 			List<LivingEntity> ents = w.getLivingEntities();
@@ -38,6 +40,7 @@ public class UtilityCommands {
 	 * @param server
 	 */
 	public static void deleteItems(Server server){
+		server.broadcastMessage("" + ChatColor.GOLD + "Deleting all dropped items...");
 		List<World> worlds = server.getWorlds();
 		for (World w: worlds){
 			List<Entity> ents = w.getEntities();
