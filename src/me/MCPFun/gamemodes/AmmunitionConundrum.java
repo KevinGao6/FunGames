@@ -78,9 +78,9 @@ public class AmmunitionConundrum {
 	private static final int PTS_PER_DEATH = -0;
 	private static final int PTS_PER_1ST_PLACE = 2;
 	private static final int PTS_LOST_PER_SELFKILL = 1;
-//	private static final int PTS_PER_2ND_PLACE = 1;
+	//	private static final int PTS_PER_2ND_PLACE = 1;
 
-	
+
 	/**
 	 * This current server
 	 */
@@ -132,13 +132,19 @@ public class AmmunitionConundrum {
 	private boolean hasBoolay;
 
 	/**
+	 * Scoreboard
+	 */
+	private Scoreboard board;
+
+	/**
 	 * Scoreboard objectives
 	 */
 	private Objective playerScore;
 	private Objective playerKills;
 	private Objective playerDeaths;
 	private Objective roundsWon;
-	
+	private Objective[] objectives;
+
 	/**
 	 * Default constructor
 	 * @param moderator the default moderator
@@ -206,6 +212,7 @@ public class AmmunitionConundrum {
 	 * PRECONDITION: No more than MAX_PLAYERS players already in game
 	 * @param p the new player
 	 */
+	@SuppressWarnings("deprecation")
 	public void addPlayer(Player p){
 		if (players.size() >= MAX_PLAYERS){
 			this.tellModerator("Too many existing players. Please remove a player before adding another.");
@@ -225,6 +232,13 @@ public class AmmunitionConundrum {
 		players.add(p);
 		this.tellModerator(p.getDisplayName() + " was added to the group");
 
+		p.setScoreboard(board);
+
+		//Reset all scores to 0
+		for (Objective o: objectives){
+			Score score = o.getScore(p);
+			score.setScore(0);
+		}
 	}
 
 	/**
@@ -239,13 +253,14 @@ public class AmmunitionConundrum {
 			return false;
 		}
 
-		if (players.contains(p)){
-			this.tellModerator(p.getDisplayName() + " was removed from the game.");
-			return players.remove(p);
+		if (!players.contains(p)){
+			this.tellModerator("Invalid player to remove.");
+			return false;
 		}
-
-		this.tellModerator("Invalid player to remove.");
-		return false;
+		
+		p.setScoreboard(null);
+		this.tellModerator(p.getDisplayName() + " was removed from the game.");
+		return players.remove(p);
 	}
 
 	/**
@@ -353,7 +368,7 @@ public class AmmunitionConundrum {
 			ran = (int)(Math.random()*curPlayers.size());
 			specials.add(curPlayers.remove(ran));
 		}
-		
+
 		//Deflector only if at least 3 players
 		if (players.size() > 2){
 			ran = (int)(Math.random()*curPlayers.size());
@@ -376,18 +391,17 @@ public class AmmunitionConundrum {
 	/**
 	 * Creates a scoreboard for this gamemode
 	 */
-	@SuppressWarnings("deprecation")
 	private void makeScoreboard(){
 		this.tellModerator("Making scoreboard...");
 		ScoreboardManager manager = Bukkit.getScoreboardManager();
-		Scoreboard board = manager.getNewScoreboard();
+		board = manager.getNewScoreboard();
 
 		playerScore = board.registerNewObjective("playerScore", "dummy");
 		playerKills = board.registerNewObjective("playerKills", "dummy");
 		playerDeaths = board.registerNewObjective("playerDeaths", "dummy");
 		roundsWon = board.registerNewObjective("roundsWon", "dummy");
 
-		Objective[] objectives = new Objective[4];
+		objectives = new Objective[4];
 		objectives[0] = playerScore;
 		objectives[1] = playerKills;
 		objectives[2] = playerDeaths;
@@ -402,17 +416,6 @@ public class AmmunitionConundrum {
 		playerKills.setDisplayName(ChatColor.GREEN + "Kills");
 		playerDeaths.setDisplayName(ChatColor.GREEN + "Deaths");
 		roundsWon.setDisplayName(ChatColor.GREEN + "Rounds Won");
-		
-		for (Player p: players){
-			//Set scoreboard for each participating player
-			p.setScoreboard(board);
-			
-			//Reset all scores to 0
-			for (Objective o: objectives){
-				Score score = o.getScore(p);
-				score.setScore(0);
-			}
-		}
 	}
 
 	/**
@@ -495,7 +498,7 @@ public class AmmunitionConundrum {
 				shooter.damage(1000.0);
 				//Give kill to reflector
 				addKill(shotted);
-				
+
 				selfKill(shooter);
 				server.broadcastMessage("" + ChatColor.RED + "The funman shot the reflector and killed themself");
 			}
@@ -519,7 +522,7 @@ public class AmmunitionConundrum {
 
 		Player p = e.getEntity();
 		EntityDamageEvent EDE = p.getLastDamageCause();
-		
+
 		//A Kill that is part of this AC Game
 		if (alives.contains(p)){
 
@@ -527,7 +530,7 @@ public class AmmunitionConundrum {
 			if (!(EDE instanceof EntityDamageByEntityEvent)){
 				e.setDeathMessage(null);
 			}
-			
+
 			//Player was killed by another participating player: Give points to killer
 			else {
 				Entity damager = ((EntityDamageByEntityEvent)(EDE)).getDamager();
@@ -536,10 +539,10 @@ public class AmmunitionConundrum {
 					addKill(killer);
 				}
 			}
-			
+
 			//Update the settings of the player that just died
 			addDeath(p);
-			
+
 			deads.add(p);
 			alives.remove(p);
 			e.getDrops().clear();
@@ -606,7 +609,7 @@ public class AmmunitionConundrum {
 			this.moderator.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + msg);
 		}
 	}
-	
+
 	/**
 	 * Adds 1 to the objective playerKills for the target player on the scoreboard
 	 * Adds the number of points to the target player's playerScore defined by PTS_PER_WIN
@@ -616,11 +619,11 @@ public class AmmunitionConundrum {
 	private void addKill(Player p){
 		Score score = playerKills.getScore(p);
 		score.setScore(score.getScore() + 1);
-		
+
 		score = playerScore.getScore(p);
 		score.setScore(score.getScore() + PTS_PER_KILL);
 	}
-	
+
 	/**
 	 * Adds 1 to the objective playerDeaths for the target player on the scoreboard
 	 * Adds the number of points to the target player's playerScore defined by PTS_PER_DEATH
@@ -630,11 +633,11 @@ public class AmmunitionConundrum {
 	private void addDeath(Player p){
 		Score score = playerDeaths.getScore(p);
 		score.setScore(score.getScore() + 1);
-		
+
 		score = playerScore.getScore(p);
 		score.setScore(score.getScore() + PTS_PER_DEATH);
 	}
-	
+
 	/**
 	 * Adds 1 to the objective roundsWon for the target player on the scoreboard
 	 * Adds the number of points to the target player's playerScore defined by PTS_PER_1ST_PLACE
@@ -644,11 +647,11 @@ public class AmmunitionConundrum {
 	private void addRoundWon(Player p){
 		Score score = roundsWon.getScore(p);
 		score.setScore(score.getScore() + 1);
-		
+
 		score = playerScore.getScore(p);
 		score.setScore(score.getScore() + PTS_PER_1ST_PLACE);
 	}
-	
+
 	/**
 	 * Removes 1 from the objective playerKills for the target player on the scoreboard
 	 * Removes the number of points to the target player's playerScore defined by PTS_LOST_PER_SELFKILL
@@ -659,7 +662,7 @@ public class AmmunitionConundrum {
 		p.sendMessage(ChatColor.RED + "-1 Kill and -" + PTS_LOST_PER_SELFKILL + " Score for killing yourself.");
 		Score score = playerKills.getScore(p);
 		score.setScore(score.getScore() - 1);
-		
+
 		score = playerScore.getScore(p);
 		score.setScore(score.getScore() - PTS_LOST_PER_SELFKILL);
 	}

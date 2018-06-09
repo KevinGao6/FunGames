@@ -1,16 +1,16 @@
 AmmunitionConundrum
-Quick Fixes:
 
+Bug Fixes:
 
-To add:
+Features to Add Before Release:
 - Spawn Locations
 - Scoreboard
-	- Point System
 	- Points for second place
     
 Give players a nonsense weapon for fun
 
 
+Far down the line:
 - Managing Multiple Games
 	- Fix overlapping games
 	- ArrayList of all games
