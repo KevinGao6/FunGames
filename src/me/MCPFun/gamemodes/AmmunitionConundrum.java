@@ -2,6 +2,7 @@ package me.MCPFun.gamemodes;
 
 import java.util.ArrayList;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -17,6 +18,11 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Score;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.ScoreboardManager;
 
 /**
  * The first, original gamemode of the server
@@ -61,10 +67,20 @@ public class AmmunitionConundrum {
 	private static final int DEFAULT_MISFIRE_LENGTH_TICKS = 10;
 
 	/**
-	 * Ticks which a normal player is set aflame if he/she misfires
+	 * Maximum number of players that can participate in a singular AC Game
 	 */
 	private static final int MAX_PLAYERS = 4;
 
+	/**
+	 * Points for specific AC Game events
+	 */
+	private static final int PTS_PER_KILL = 1;
+	private static final int PTS_PER_DEATH = -0;
+	private static final int PTS_PER_1ST_PLACE = 2;
+	private static final int PTS_LOST_PER_SELFKILL = 1;
+//	private static final int PTS_PER_2ND_PLACE = 1;
+
+	
 	/**
 	 * This current server
 	 */
@@ -116,6 +132,14 @@ public class AmmunitionConundrum {
 	private boolean hasBoolay;
 
 	/**
+	 * Scoreboard objectives
+	 */
+	private Objective playerScore;
+	private Objective playerKills;
+	private Objective playerDeaths;
+	private Objective roundsWon;
+	
+	/**
 	 * Default constructor
 	 * @param moderator the default moderator
 	 */
@@ -133,6 +157,7 @@ public class AmmunitionConundrum {
 		server.broadcastMessage("" + ChatColor.GOLD + "Disabling Mob spawning...");
 		server.broadcastMessage("" + ChatColor.GOLD + "Locking Players' foodLevel at 20...");
 		this.tellModerator("New AC Game Created.");
+		this.makeScoreboard();
 	}
 
 	/**
@@ -322,19 +347,23 @@ public class AmmunitionConundrum {
 			alives.add(p);
 		}
 
-
-		int ran = (int)(Math.random()*curPlayers.size());
-		specials.add(curPlayers.remove(ran));
-
+		int ran = 0;
+		//One Special
+		if (players.size() > 0){
+			ran = (int)(Math.random()*curPlayers.size());
+			specials.add(curPlayers.remove(ran));
+		}
+		
+		//Deflector only if at least 3 players
 		if (players.size() > 2){
 			ran = (int)(Math.random()*curPlayers.size());
 			protecteds.add(curPlayers.remove(ran));
 		}
-
 		else{
 			this.tellModerator("Play with 3 or more to get optimal experience.");
 		}
 
+		//The rest of the players are all normals
 		for (Player p: curPlayers){
 			normals.add(p);
 		}
@@ -342,6 +371,48 @@ public class AmmunitionConundrum {
 		System.out.println(ChatColor.RED + "Specials are: " + specials);
 		System.out.println(ChatColor.YELLOW + "Protecteds are: " + protecteds);
 		System.out.println(ChatColor.GREEN + "Normals are: " + normals);
+	}
+
+	/**
+	 * Creates a scoreboard for this gamemode
+	 */
+	@SuppressWarnings("deprecation")
+	private void makeScoreboard(){
+		this.tellModerator("Making scoreboard...");
+		ScoreboardManager manager = Bukkit.getScoreboardManager();
+		Scoreboard board = manager.getNewScoreboard();
+
+		playerScore = board.registerNewObjective("playerScore", "dummy");
+		playerKills = board.registerNewObjective("playerKills", "dummy");
+		playerDeaths = board.registerNewObjective("playerDeaths", "dummy");
+		roundsWon = board.registerNewObjective("roundsWon", "dummy");
+
+		Objective[] objectives = new Objective[4];
+		objectives[0] = playerScore;
+		objectives[1] = playerKills;
+		objectives[2] = playerDeaths;
+		objectives[3] = roundsWon;
+
+		playerScore.setDisplaySlot(DisplaySlot.SIDEBAR);
+		playerKills.setDisplaySlot(DisplaySlot.SIDEBAR);
+		playerDeaths.setDisplaySlot(DisplaySlot.SIDEBAR);
+		roundsWon.setDisplaySlot(DisplaySlot.SIDEBAR);
+
+		playerScore.setDisplayName(ChatColor.GREEN + "Score");
+		playerKills.setDisplayName(ChatColor.GREEN + "Kills");
+		playerDeaths.setDisplayName(ChatColor.GREEN + "Deaths");
+		roundsWon.setDisplayName(ChatColor.GREEN + "Rounds Won");
+		
+		for (Player p: players){
+			//Set scoreboard for each participating player
+			p.setScoreboard(board);
+			
+			//Reset all scores to 0
+			for (Objective o: objectives){
+				Score score = o.getScore(p);
+				score.setScore(0);
+			}
+		}
 	}
 
 	/**
@@ -422,13 +493,17 @@ public class AmmunitionConundrum {
 
 			if (protecteds.contains(shotted)){
 				shooter.damage(1000.0);
+				//Give kill to reflector
+				addKill(shotted);
+				
+				selfKill(shooter);
 				server.broadcastMessage("" + ChatColor.RED + "The funman shot the reflector and killed themself");
 			}
 
 			else{
 				shotted.damage(1000.0);
-				server.broadcastMessage("" + ChatColor.RED + "The funman's sole snowball kills a poor victim");
-
+				addKill(shooter);
+				server.broadcastMessage("" + ChatColor.RED + "The funman's sole snowball finds a poor victim");
 			}
 		}
 	}
@@ -444,13 +519,27 @@ public class AmmunitionConundrum {
 
 		Player p = e.getEntity();
 		EntityDamageEvent EDE = p.getLastDamageCause();
+		
+		//A Kill that is part of this AC Game
 		if (alives.contains(p)){
-			
-			//If the player was killed by a snowball
+
+			//If the player was not killed by a player
 			if (!(EDE instanceof EntityDamageByEntityEvent)){
 				e.setDeathMessage(null);
 			}
-
+			
+			//Player was killed by another participating player: Give points to killer
+			else {
+				Entity damager = ((EntityDamageByEntityEvent)(EDE)).getDamager();
+				if (damager instanceof Player){
+					Player killer = ((Player)(damager));
+					addKill(killer);
+				}
+			}
+			
+			//Update the settings of the player that just died
+			addDeath(p);
+			
 			deads.add(p);
 			alives.remove(p);
 			e.getDrops().clear();
@@ -465,8 +554,12 @@ public class AmmunitionConundrum {
 	public void roundOver(){
 		roundActive = false;
 		server.broadcastMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "Round Over!");
-		if (alives.size() == 1)
-			server.broadcastMessage("" + ChatColor.AQUA + ChatColor.BOLD + alives.get(0).getDisplayName() + " is the winner!");
+		Player winner = null;
+		if (alives.size() == 1){
+			winner = alives.get(0);
+			this.addRoundWon(winner);
+			server.broadcastMessage("" + ChatColor.AQUA + ChatColor.BOLD + winner.getDisplayName() + " is the winner!");
+		}
 		hasBoolay = false;
 
 		for (Player p : players){
@@ -476,7 +569,6 @@ public class AmmunitionConundrum {
 			inv.setChestplate(null);
 			inv.setLeggings(null);
 			inv.setBoots(null);
-
 		}
 	}
 
@@ -513,5 +605,62 @@ public class AmmunitionConundrum {
 		else {
 			this.moderator.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + msg);
 		}
+	}
+	
+	/**
+	 * Adds 1 to the objective playerKills for the target player on the scoreboard
+	 * Adds the number of points to the target player's playerScore defined by PTS_PER_WIN
+	 * @param p the target player
+	 */
+	@SuppressWarnings("deprecation")
+	private void addKill(Player p){
+		Score score = playerKills.getScore(p);
+		score.setScore(score.getScore() + 1);
+		
+		score = playerScore.getScore(p);
+		score.setScore(score.getScore() + PTS_PER_KILL);
+	}
+	
+	/**
+	 * Adds 1 to the objective playerDeaths for the target player on the scoreboard
+	 * Adds the number of points to the target player's playerScore defined by PTS_PER_DEATH
+	 * @param p the target player
+	 */
+	@SuppressWarnings("deprecation")
+	private void addDeath(Player p){
+		Score score = playerDeaths.getScore(p);
+		score.setScore(score.getScore() + 1);
+		
+		score = playerScore.getScore(p);
+		score.setScore(score.getScore() + PTS_PER_DEATH);
+	}
+	
+	/**
+	 * Adds 1 to the objective roundsWon for the target player on the scoreboard
+	 * Adds the number of points to the target player's playerScore defined by PTS_PER_1ST_PLACE
+	 * @param p the target player
+	 */
+	@SuppressWarnings("deprecation")
+	private void addRoundWon(Player p){
+		Score score = roundsWon.getScore(p);
+		score.setScore(score.getScore() + 1);
+		
+		score = playerScore.getScore(p);
+		score.setScore(score.getScore() + PTS_PER_1ST_PLACE);
+	}
+	
+	/**
+	 * Removes 1 from the objective playerKills for the target player on the scoreboard
+	 * Removes the number of points to the target player's playerScore defined by PTS_LOST_PER_SELFKILL
+	 * @param p the target player
+	 */
+	@SuppressWarnings("deprecation")
+	private void selfKill(Player p){
+		p.sendMessage(ChatColor.RED + "-1 Kill and -" + PTS_LOST_PER_SELFKILL + " Score for killing yourself.");
+		Score score = playerKills.getScore(p);
+		score.setScore(score.getScore() - 1);
+		
+		score = playerScore.getScore(p);
+		score.setScore(score.getScore() - PTS_LOST_PER_SELFKILL);
 	}
 }

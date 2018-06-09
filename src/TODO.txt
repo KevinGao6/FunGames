@@ -6,8 +6,10 @@ To add:
 - Spawn Locations
 - Scoreboard
 	- Point System
+	- Points for second place
     
 Give players a nonsense weapon for fun
+
 
 - Managing Multiple Games
 	- Fix overlapping games

@@ -217,7 +217,17 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 
 	}	
 
+	@EventHandler
+	public void onEntityDamage(EntityDamageByEntityEvent e){
+		if (gameAC != null)
+			gameAC.hit(e);
+		defaultOnDamage(e);
+	}
 
+	/**
+	 * Method #1 of 2 methods which enable the FunTypes defined by enum FunTypes if called in OnPlayerInteract
+	 * @param e
+	 */
 	private void defaultOnInteract(PlayerInteractEvent e){
 		//Null checks
 		if (e == null || e.getItem() == null)
@@ -240,13 +250,10 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 		}
 	}
 
-	@EventHandler
-	public void onEntityDamage(EntityDamageByEntityEvent e){
-		if (gameAC != null)
-			gameAC.hit(e);
-		defaultOnDamage(e);
-	}
-
+	/**
+	 * Method #2 of 2 methods which enable the FunTypes defined by enum FunTypes if called in OnPlayerInteract
+	 * @param e
+	 */
 	@SuppressWarnings("deprecation")
 	private void defaultOnDamage(EntityDamageByEntityEvent e){
 		Entity ent = e.getDamager();
@@ -274,6 +281,10 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 		}
 	}
 
+	/**
+	 * Method run whenever a player dies
+	 * @param e
+	 */
 	@EventHandler
 	public void onDeath(PlayerDeathEvent e){
 		if (gameAC != null)
