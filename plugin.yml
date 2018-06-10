@@ -15,3 +15,9 @@ commands:
     usage: /<command>
     description: Deletes all the dropped items in all worlds. Warning! Resource-heavy and cannot be undone.
     aliases: [deleteitems]
+  loadfile:
+    usage: /<command> [name] [filename]
+    description: Saves a list of spawns under name in filename
+  loadspawns:
+    usage: /<command> [name]
+    description: Handles a list of already loaded spawns

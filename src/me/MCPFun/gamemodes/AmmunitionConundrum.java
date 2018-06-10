@@ -6,6 +6,7 @@ import java.util.HashMap;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.enchantments.Enchantment;
@@ -73,16 +74,21 @@ public class AmmunitionConundrum {
 	private static final int MAX_PLAYERS = 4;
 
 	/**
+	 * Amount of extra damage a reflector takes from melee attacks
+	 */
+	private static final double EXTRA_DAMAGE_CONSTANT = 1.25;
+
+	/**
 	 * Points for specific AC Game events
 	 */
 	private static final int PTS_PER_KILL = 1;
 	private static final int PTS_PER_REFLECT_KILL = 1;
 	private static final int PTS_PER_1ST_PLACE = 2;
-	
+
 	//Should be negative
 	private static final int PTS_PER_DEATH = 0;
 	private static final int PTS_LOST_PER_SELF_KILL = -1;
-	//	private static final int PTS_PER_2ND_PLACE = 1;
+	private static final int PTS_PER_2ND_PLACE = 1;
 
 
 	/**
@@ -139,7 +145,7 @@ public class AmmunitionConundrum {
 	 * Scoreboard manager
 	 */
 	private ScoreboardManager manager;
-	
+
 	/**
 	 * Scoreboard
 	 */
@@ -149,11 +155,16 @@ public class AmmunitionConundrum {
 	 * Scoreboard objective
 	 */
 	private Objective objective;
-	
+
 	/**
 	 * Hashmap which associates players with their corresponding stats
 	 */
 	private HashMap<Player, AmmunitionConundrumStat> statMap;
+
+	/**
+	 * List of locations that the server can teleport players to on nextRound()
+	 */
+	private ArrayList<Location> spawnList;
 
 	/**
 	 * Default constructor
@@ -250,10 +261,10 @@ public class AmmunitionConundrum {
 		Score score = objective.getScore(p);
 		score.setScore(999);
 		score.setScore(0);
-		
+
 		statMap.put(p, new AmmunitionConundrumStat());
 		this.tellModerator("Stat object for " + p.getDisplayName() + " created.");
-		
+
 	}
 
 	/**
@@ -263,7 +274,7 @@ public class AmmunitionConundrum {
 	 */
 	@SuppressWarnings("deprecation")
 	public boolean removePlayer(Player p){
-		
+
 		if (p == null){
 			this.tellModerator("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Could not find Player.");
 			return false;
@@ -273,21 +284,21 @@ public class AmmunitionConundrum {
 			this.tellModerator("Invalid player to remove.");
 			return false;
 		}
-		
+
 		if (roundActive){
 			roundOver();
 		}
-		
+
 		statMap.remove(p);
 		this.tellModerator("Stat object for " + p.getDisplayName() + " deleted.");
-		
+
 		this.resetScore(p);
 		this.tellModerator("Score for " + p.getDisplayName() + " set to 0.");
 
 		p.setScoreboard(manager.getNewScoreboard());
 		board.resetScores(p);
 		this.tellModerator("Removed " + p.getDisplayName() + " from the scoreboard.");
-		
+
 		this.tellModerator(p.getDisplayName() + " was removed from the game.");
 		return players.remove(p);		
 	}
@@ -301,7 +312,7 @@ public class AmmunitionConundrum {
 		for (Player p: players){
 			removePlayer(p);
 		}
-		
+
 		this.tellModerator("All players removed.");
 	}
 
@@ -327,7 +338,7 @@ public class AmmunitionConundrum {
 				this.tellModerator("Not all players have respawned.");
 				return;
 			}
-		
+
 		generateRoles();
 		hasBoolay = true;
 
@@ -395,7 +406,7 @@ public class AmmunitionConundrum {
 		ArrayList<Player> curPlayers = new ArrayList<Player>(players.size());
 		for (Player p: players){
 
-			//TODO: Teleport people to corresponding places
+			teleportPlayers();
 			curPlayers.add(p);
 			alives.add(p);
 		}
@@ -505,15 +516,22 @@ public class AmmunitionConundrum {
 			return;
 		}
 
+		//Player attacks player
 		if (ent instanceof Player && victim instanceof Player){
-			if (deads.contains((Player)(ent)) || deads.contains((Player)(ent))){
+
+			//Either player is not alive in the round
+			if (deads.contains((Player)(ent)) || deads.contains((Player)(victim))){
 				((Player)(ent)).sendMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "Attacking this player is not allowed.");
 				e.setCancelled(true);
+			}
+			//The attacked player is a reflector
+			else if (protecteds.contains((Player)(victim))){
+				e.setDamage(e.getDamage() * EXTRA_DAMAGE_CONSTANT);
 			}
 		}
 
 		//If the damager is a snowball shot by a player
-		if (ent instanceof Snowball && ((Snowball)ent).getShooter() instanceof Player && ((Player)victim) instanceof Player){
+		else if (ent instanceof Snowball && ((Snowball)ent).getShooter() instanceof Player && ((Player)victim) instanceof Player){
 			Player shooter = (Player)(((Snowball)ent).getShooter());			
 			Player shotted = ((Player)victim);
 
@@ -548,16 +566,16 @@ public class AmmunitionConundrum {
 
 		if(!roundActive)
 			return;
-		
+
 
 		Player p = e.getEntity();
 		EntityDamageEvent EDE = p.getLastDamageCause();
 
 		//A Kill that is part of this AC Game
 		if (alives.contains(p)){
-			
+
 			e.setDeathMessage(null);
-			
+
 			//If the player was not killed by a player
 			if (!(EDE instanceof EntityDamageByEntityEvent)){
 			}
@@ -572,17 +590,22 @@ public class AmmunitionConundrum {
 					this.alert(killer, "You gained " + PTS_PER_KILL + " points for stabbing " + p.getDisplayName() + ".");
 				}
 			}
-			
+
 			server.broadcastMessage(ChatColor.YELLOW + p.getDisplayName() + " died!");
 
 			//Update the settings of the player that just died
 			changeScore(p, PTS_PER_DEATH);
-//			this.alert(p, "You lost " + PTS_PER_DEATH + " points for dying.");
+			//			this.alert(p, "You lost " + PTS_PER_DEATH + " points for dying.");
 			statMap.get(p).addDeath();
-			
+
 			deads.add(p);
 			alives.remove(p);
 			e.getDrops().clear();
+			if (alives.size() == 1){
+				changeScore(p, PTS_PER_2ND_PLACE);
+				this.alert(p, "You gained " + PTS_PER_2ND_PLACE + " points for coming in second.");
+			}
+
 			if (alives.size() <= 1)
 				roundOver();
 		}
@@ -595,7 +618,7 @@ public class AmmunitionConundrum {
 		roundActive = false;
 		server.broadcastMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "Round Over!");
 		Player winner = null;
-		
+
 		//If there was a winner
 		if (alives.size() == 1){
 			winner = alives.get(0);
@@ -623,7 +646,7 @@ public class AmmunitionConundrum {
 			server.broadcastMessage(p.getDisplayName() + " has " + statMap.get(p));
 		}
 	}
-	
+
 	/**
 	 * Shows this AC Game's info to the moderator
 	 */
@@ -673,7 +696,7 @@ public class AmmunitionConundrum {
 		Score score = objective.getScore(p);
 		score.setScore(newScore);
 	}
-	
+
 	/**
 	 * Changes the score of the target player by changeAmount - can be negative
 	 * @param p the target player
@@ -686,7 +709,7 @@ public class AmmunitionConundrum {
 		Score score = objective.getScore(p);
 		score.setScore(score.getScore() + changeAmount);
 	}
-	
+
 	/**
 	 * Sets the score of the target player to 0
 	 * @param p the target player
@@ -698,7 +721,7 @@ public class AmmunitionConundrum {
 		Score score = objective.getScore(p);
 		score.setScore(0);
 	}
-	
+
 	/**
 	 * Method to standardize the personal alert messages for AC Game Players
 	 * @param p the player to alert
@@ -706,5 +729,41 @@ public class AmmunitionConundrum {
 	 */
 	private void alert(Player p, String msg){
 		p.sendMessage(ChatColor.RED + msg);
+	}
+
+	/**
+	 * Recieves a list of locations which act as the temporary spawn locations during the AC Game
+	 * @param locations
+	 */
+	public void receiveSpawnList(ArrayList<Location> locations){
+		if (locations != null)
+			this.spawnList = locations;
+		else{
+			this.tellModerator("List of loaded locations is null. Line 738 in Ammunition Conundrum.");
+		}
+	}
+	
+	/**
+	 * Teleports the players to the locations designated by spawnList
+	 */
+	private void teleportPlayers(){
+		if (spawnList == null){
+			this.tellModerator("spawnList not loaded. Aborting random teleporting...");
+			return;
+		}
+		
+		if (spawnList.size() < players.size()){
+			this.tellModerator("Not enough unique spawns locations in spawnList for all the participating players. Aborting random teleporting...");
+			return;
+		}
+		
+		ArrayList<Location> temp = new ArrayList<Location>(spawnList);
+		
+		for (Player p: players){
+			Location newLoc = temp.remove((int)(Math.random()*temp.size()));
+			p.teleport(newLoc);
+		}
+		
+		this.tellModerator("Successfully teleported all players.");
 	}
 }

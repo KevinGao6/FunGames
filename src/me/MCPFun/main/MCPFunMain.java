@@ -1,7 +1,10 @@
 package me.MCPFun.main;
 
+import java.util.ArrayList;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
@@ -23,6 +26,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import me.MCPFun.gamemodes.AmmunitionConundrum;
 import me.MCPFun.reference.FunType;
+import me.MCPFun.reference.GameSpawns;
 import me.MCPFun.reference.UtilityCommands;
 
 /**
@@ -275,14 +279,52 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 			}
 		}
 
-		//deletemobs
+		// /delemobs
 		else if (cmdName.equals("delmobs")){
 			UtilityCommands.deleteMobs(server);
 		}
 
-		//deleteitems
+		// /delitems
 		else if (cmdName.equals("delitems")){
 			UtilityCommands.deleteItems(server);
+		}
+		
+		// /loadfile <name> <fileName> 
+		else if (cmdName.equals("loadfile")){
+			
+			if (args.length != 2){
+				sender.sendMessage(ChatColor.RED + "Usage: /loadfile <name> <filename>");
+			}
+			
+			else{
+				//If valid number of args, attempt to load the file
+				String name = args[0];
+				String fileName = args[1];
+				GameSpawns.loadFile(name, fileName, sender);
+			}
+			
+			return true;
+			
+		}
+		
+		// /loadspawns <name>
+		else if (cmdName.equals("loadspawns")){
+			
+			if(args.length != 1){
+				sender.sendMessage(ChatColor.RED + "Usage: /loadspawns <name>");
+			} 
+			else{
+				//If valid number of args, attempt to retrieve the list of spawns
+				ArrayList<Location> spawns = GameSpawns.getSpawnList(args[0]);
+				
+				if (spawns == null){
+					sender.sendMessage(ChatColor.RED + "No entry found under " + args[0]);
+				}
+				else{
+					gameAC.receiveSpawnList(spawns);
+				}
+				
+			}
 		}
 
 		return true;

@@ -1,11 +1,5 @@
 AmmunitionConundrum
 Features to Add Before Release:
-
-Reflector takes extra damage from melees
-
-- Spawn Locations
-- Scoreboard
-	- Points for second place
     
 Give players a nonsense weapon for fun
 
