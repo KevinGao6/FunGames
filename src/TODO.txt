@@ -1,35 +1,7 @@
 AmmunitionConundrum
 Features to Add Before Release:
 
-Scoreboard show only the players' scores
-Better scoreboard colors
-Inform players of why their scores are being changed
-Print out kills/deaths/KDR/rounds won
-removing player doesn't reset all scores
-
-2x killing all mobs - remove msg for moderator
-killing all mobs should be called in AC create at end in MCPFunMain onCommand
-
-Players shot with snowballs get "died" message twice.
-/ac next when player is respawning breaks their respawn
-- Don't allow when all players aren't alive
-
-fix /ac info
-
-/ac [setscore|changescore|resetscore] [player]
-
-Disable kill-stealing - .setHealth(.getHealth()-20)?
-in misfire
-Instead of .damage, always .setHealth(0.0)
-or remember and reset .getLastDamageCause();
-
-Better notifcation descriptions and colors
-- just check all .sendMessages
-
-Relogging breaks the .contains check
-
-/ac delete correctly removes everything --> Call method in AC Class
-/ac remove resets the score for a player
+Reflector takes extra damage from melees
 
 - Spawn Locations
 - Scoreboard
@@ -37,6 +9,7 @@ Relogging breaks the .contains check
     
 Give players a nonsense weapon for fun
 
+Information for all /ac __ commands
 
 Far down the line:
 - Managing Multiple Games

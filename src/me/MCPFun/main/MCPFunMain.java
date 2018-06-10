@@ -17,6 +17,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -77,10 +78,10 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 
 		//OP COMMANDS FROM HERE ON OUT
 		if (!sender.isOp()){
-			sender.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "You do not have permission to use this command.");
+			sender.sendMessage("" + ChatColor.RED + "You do not have permission to use this command.");
 			return true;
 		}
-		
+
 		if (cmdName.equals("AC")){
 
 			if (args.length == 0){
@@ -99,30 +100,33 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 					else {
 						gameAC = new AmmunitionConundrum(server, null);
 					}
+					UtilityCommands.deleteMobs(server);
 				} 
 				else {
-					sender.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "An AC Game already exists. Please delete the previous instance before creating a new one.");
+					sender.sendMessage("" + ChatColor.LIGHT_PURPLE + "An AC Game already exists. Please delete the previous instance before creating a new one.");
 				}
 			}
 
 			//Null check for game AC
 			else if (gameAC == null){
-				sender.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "No AC Game Exists!");
+				sender.sendMessage("" + ChatColor.LIGHT_PURPLE + "No AC Game Exists!");
 				return true;
 			}
 
 			//Moderator Check for game AC
 			else if (!(sender instanceof Player) || !sender.equals(gameAC.getModerator())){
-				sender.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "You are not the moderator for this AC Game.");
+				sender.sendMessage("" + ChatColor.LIGHT_PURPLE + "You are not the moderator for this AC Game.");
 				return true;
 			}
 
 			// /AC delete
 			else if (arg0.equals("delete")){
+				gameAC.roundOver();
 				gameAC = null;
-				sender.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "AC Game deleted.");
+				sender.sendMessage("" + ChatColor.LIGHT_PURPLE + "AC Game deleted.");
 				server.broadcastMessage("" + ChatColor.GOLD + "Re-enabling Mob spawning...");
 				server.broadcastMessage("" + ChatColor.GOLD + "Un-locking Players' foodLevels...");
+				return true;
 			}
 
 			// /AC set <Player>
@@ -130,7 +134,7 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 
 				//Invalid Number of args
 				if (args.length != 2){
-					sender.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Usage: /AC set <Player>");
+					sender.sendMessage("" + ChatColor.LIGHT_PURPLE + "Usage: /AC set <Player>");
 				} 
 
 				//Valid Number of args
@@ -139,13 +143,15 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 					gameAC.setModerator(p);
 
 				}
+
+				return true;
 			}
 
 			// /AC add <Player>
 			else if (arg0.equals("add")){
 				//Invalid Number of args
 				if (args.length != 2){
-					sender.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Usage: /AC add <Player>");
+					sender.sendMessage("" + ChatColor.LIGHT_PURPLE + "Usage: /AC add <Player>");
 				} 
 
 				//Valid Number of args
@@ -154,56 +160,129 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 					gameAC.addPlayer(p);
 
 				}
+
+				return true;
 			}
 
 			// /AC remove <Player>
 			else if (arg0.equals("remove")){
-				//Invalid Number of args
+				//Invalid number of args
 				if (args.length != 2){
-					sender.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Usage: /AC remove <Player>");
+					sender.sendMessage("" + ChatColor.LIGHT_PURPLE + "Usage: /AC remove <Player>");
 				} 
 
-				//Valid Number of args
+				//Valid number of args
 				else {
 					Player p = server.getPlayer(args[1]);
 					gameAC.removePlayer(p);
+				}
+
+				return true;
+			}
+
+			// /AC setscore <Player> number
+			else if (arg0.equals("setscore")){
+				//Invalid number of args
+				if (args.length != 3){
+					sender.sendMessage("" + ChatColor.LIGHT_PURPLE + "Usage: /AC setscore <Player> amount");
+				} 
+
+				//Valid number of args
+				else{
+					int score = 0;
+
+					//Attempt to parse int
+					try{
+						score = Integer.parseInt(args[2]);
+						Player p = server.getPlayer(args[1]);
+						gameAC.setScore(p, score);
+					} catch (Exception e){
+						sender.sendMessage("" + ChatColor.LIGHT_PURPLE + "Invalid amount.");
+					}
+				}
+			}
+
+			// /AC changescore <Player> number
+			else if (arg0.equals("changescore")){
+				//Invalid number of args
+				if (args.length != 3){
+					sender.sendMessage("" + ChatColor.LIGHT_PURPLE + "Usage: /AC changescore <Player> amount");
+				} 
+
+				//Valid number of args
+				else{
+					int score = 0;
+
+					//Attempt to parse int
+					try{
+						score = Integer.parseInt(args[2]);
+						Player p = server.getPlayer(args[1]);
+						gameAC.changeScore(p, score);
+					} catch (Exception e){
+						sender.sendMessage("" + ChatColor.LIGHT_PURPLE + "Invalid amount.");
+					}
+				}
+			}
+
+			// /AC resetscore <Player>
+			else if (arg0.equals("resetscore")){
+				//Invalid number of args
+				if (args.length != 2){
+					sender.sendMessage("" + ChatColor.LIGHT_PURPLE + "Usage: /AC resetscore <Player>");
+				} 
+
+				//Valid number of args
+				else{
+					Player p = server.getPlayer(args[1]);
+					gameAC.resetScore(p);
 				}
 			}
 
 			// /AC removeall
 			else if (arg0.equals("removeall")){
 				gameAC.removeAllPlayers();
+				return true;
 			}
 
 			// /AC next
 			else if (arg0.equals("next")){
 				gameAC.nextRound();
+				return true;
 			}
 
 			// /AC over
 			else if (arg0.equals("over")){
 				if (gameAC.getRoundActive())
 					gameAC.roundOver();
+				return true;
 			}
-			
+
 			// /AC info
 			else if (arg0.equals("info")){
-				if (gameAC.getRoundActive()){
-					gameAC.showInfo();
-				}
+				gameAC.showInfo();
+				return true;
+			}
+
+			// /AC stats
+			else if (arg0.equals("stats")){
+				gameAC.showPlayerStats();
+				return true;
+			}
+
+			//AC + unknown argument0
+			else {
+				sender.sendMessage(ChatColor.LIGHT_PURPLE + "Commands: create/add/set/remove/removeAll/next/delete/over");
 			}
 		}
 
 		//deletemobs
 		else if (cmdName.equals("delmobs")){
 			UtilityCommands.deleteMobs(server);
-			sender.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Deleting all mobs...");
 		}
 
 		//deleteitems
 		else if (cmdName.equals("delitems")){
 			UtilityCommands.deleteItems(server);
-			sender.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Deleting all dropped items...");
 		}
 
 		return true;
@@ -305,6 +384,13 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 	public void onCreatureSpawn(CreatureSpawnEvent event) {
 		if(gameAC != null){
 			event.setCancelled(true);
+		}
+	}
+
+	@EventHandler
+	public void onPlayerQuit(PlayerQuitEvent e){
+		if (gameAC != null){
+			gameAC.removePlayer(e.getPlayer());
 		}
 	}
 }
