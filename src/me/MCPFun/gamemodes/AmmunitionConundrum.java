@@ -132,18 +132,19 @@ public class AmmunitionConundrum {
 	private boolean hasBoolay;
 
 	/**
+	 * Scoreboard manager
+	 */
+	private ScoreboardManager manager;
+	
+	/**
 	 * Scoreboard
 	 */
 	private Scoreboard board;
 
 	/**
-	 * Scoreboard objectives
+	 * Scoreboard objective
 	 */
-	private Objective playerScore;
-	private Objective playerKills;
-	private Objective playerDeaths;
-	private Objective roundsWon;
-	private Objective[] objectives;
+	private Objective objective;
 
 	/**
 	 * Default constructor
@@ -212,7 +213,6 @@ public class AmmunitionConundrum {
 	 * PRECONDITION: No more than MAX_PLAYERS players already in game
 	 * @param p the new player
 	 */
-	@SuppressWarnings("deprecation")
 	public void addPlayer(Player p){
 		if (players.size() >= MAX_PLAYERS){
 			this.tellModerator("Too many existing players. Please remove a player before adding another.");
@@ -233,12 +233,26 @@ public class AmmunitionConundrum {
 		this.tellModerator(p.getDisplayName() + " was added to the group");
 
 		p.setScoreboard(board);
+		this.tellModerator("Scoreboard for " + p.getDisplayName() + " created.");
 
-		//Reset all scores to 0
-		for (Objective o: objectives){
-			Score score = o.getScore(p);
-			score.setScore(0);
-		}
+		this.tellModerator("Attempting to set all scores to 0 for " + p.getDisplayName());
+		
+		Score score = objective.getScore(ChatColor.GREEN + "Score:");
+		score.setScore(0);
+		
+		score = objective.getScore(ChatColor.GREEN + "Kills:");
+		score.setScore(0);
+		
+		score = objective.getScore(ChatColor.GREEN + "Deaths:");
+		score.setScore(0);
+		
+		score = objective.getScore(ChatColor.GREEN + "Rounds Won:");
+		score.setScore(0);
+//		//Reset all scores to 0
+//		for (Objective o: objectives){
+//			Score score = o.getScore(arg0);
+//			score.setScore(0);
+//		}
 	}
 
 	/**
@@ -258,7 +272,7 @@ public class AmmunitionConundrum {
 			return false;
 		}
 		
-		p.setScoreboard(null);
+		p.setScoreboard(manager.getNewScoreboard());
 		this.tellModerator(p.getDisplayName() + " was removed from the game.");
 		return players.remove(p);
 	}
@@ -268,8 +282,11 @@ public class AmmunitionConundrum {
 	 * Keeps the current moderator
 	 */
 	public void removeAllPlayers(){
-		players = new ArrayList<Player>();
 
+		for (Player p: players){
+			removePlayer(p);
+		}
+		
 		this.tellModerator("All players removed.");
 	}
 
@@ -393,29 +410,14 @@ public class AmmunitionConundrum {
 	 */
 	private void makeScoreboard(){
 		this.tellModerator("Making scoreboard...");
-		ScoreboardManager manager = Bukkit.getScoreboardManager();
+		manager = Bukkit.getScoreboardManager();
 		board = manager.getNewScoreboard();
 
-		playerScore = board.registerNewObjective("playerScore", "dummy");
-		playerKills = board.registerNewObjective("playerKills", "dummy");
-		playerDeaths = board.registerNewObjective("playerDeaths", "dummy");
-		roundsWon = board.registerNewObjective("roundsWon", "dummy");
+		objective = board.registerNewObjective("objective", "dummy");
 
-		objectives = new Objective[4];
-		objectives[0] = playerScore;
-		objectives[1] = playerKills;
-		objectives[2] = playerDeaths;
-		objectives[3] = roundsWon;
+		objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
-		playerScore.setDisplaySlot(DisplaySlot.SIDEBAR);
-		playerKills.setDisplaySlot(DisplaySlot.SIDEBAR);
-		playerDeaths.setDisplaySlot(DisplaySlot.SIDEBAR);
-		roundsWon.setDisplaySlot(DisplaySlot.SIDEBAR);
-
-		playerScore.setDisplayName(ChatColor.GREEN + "Score");
-		playerKills.setDisplayName(ChatColor.GREEN + "Kills");
-		playerDeaths.setDisplayName(ChatColor.GREEN + "Deaths");
-		roundsWon.setDisplayName(ChatColor.GREEN + "Rounds Won");
+		objective.setDisplayName(ChatColor.GREEN + "Scores");
 	}
 
 	/**
@@ -615,12 +617,12 @@ public class AmmunitionConundrum {
 	 * Adds the number of points to the target player's playerScore defined by PTS_PER_WIN
 	 * @param p the target player
 	 */
-	@SuppressWarnings("deprecation")
 	private void addKill(Player p){
-		Score score = playerKills.getScore(p);
+		this.tellModerator(p.getDisplayName() + " got a kill.");
+		Score score = objective.getScore(ChatColor.GREEN + "Kills:");
 		score.setScore(score.getScore() + 1);
 
-		score = playerScore.getScore(p);
+		score = objective.getScore(ChatColor.GREEN + "Score:");
 		score.setScore(score.getScore() + PTS_PER_KILL);
 	}
 
@@ -629,12 +631,12 @@ public class AmmunitionConundrum {
 	 * Adds the number of points to the target player's playerScore defined by PTS_PER_DEATH
 	 * @param p the target player
 	 */
-	@SuppressWarnings("deprecation")
 	private void addDeath(Player p){
-		Score score = playerDeaths.getScore(p);
+		this.tellModerator(p.getDisplayName() + " died.");
+		Score score = objective.getScore(ChatColor.GREEN + "Deaths:");
 		score.setScore(score.getScore() + 1);
 
-		score = playerScore.getScore(p);
+		score = objective.getScore(ChatColor.GREEN + "Score:");
 		score.setScore(score.getScore() + PTS_PER_DEATH);
 	}
 
@@ -643,12 +645,12 @@ public class AmmunitionConundrum {
 	 * Adds the number of points to the target player's playerScore defined by PTS_PER_1ST_PLACE
 	 * @param p the target player
 	 */
-	@SuppressWarnings("deprecation")
 	private void addRoundWon(Player p){
-		Score score = roundsWon.getScore(p);
+		this.tellModerator(p.getDisplayName() + " won a round.");
+		Score score = objective.getScore(ChatColor.GREEN + "Rounds Won:");
 		score.setScore(score.getScore() + 1);
 
-		score = playerScore.getScore(p);
+		score = objective.getScore(ChatColor.GREEN + "Score:");
 		score.setScore(score.getScore() + PTS_PER_1ST_PLACE);
 	}
 
@@ -657,13 +659,13 @@ public class AmmunitionConundrum {
 	 * Removes the number of points to the target player's playerScore defined by PTS_LOST_PER_SELFKILL
 	 * @param p the target player
 	 */
-	@SuppressWarnings("deprecation")
 	private void selfKill(Player p){
+		this.tellModerator(p.getDisplayName() + " killed themself.");
 		p.sendMessage(ChatColor.RED + "-1 Kill and -" + PTS_LOST_PER_SELFKILL + " Score for killing yourself.");
-		Score score = playerKills.getScore(p);
+		Score score = objective.getScore(ChatColor.GREEN + "Kills:");
 		score.setScore(score.getScore() - 1);
 
-		score = playerScore.getScore(p);
+		score = objective.getScore(ChatColor.GREEN + "Score:");
 		score.setScore(score.getScore() - PTS_LOST_PER_SELFKILL);
 	}
 }
