@@ -1,9 +1,10 @@
 AmmunitionConundrum
-Features to Add Before Release:
-    
-Give players a nonsense weapon for fun
+Bugs:
 
+
+Features to Add Before Release:
 Information for all /ac __ commands
+Give players a nonsense weapon for fun
 
 Far down the line:
 - Managing Multiple Games
