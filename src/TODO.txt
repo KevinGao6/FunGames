@@ -1,8 +1,22 @@
 AmmunitionConundrum
 Bugs:
+Order of notifications : On snowball kill, there are multiple death msgs
+Round Over!
+You gained 2 points for winning the round.
+kevin_ga0 is the winner!
+You gained 1 points for landing a nice shot.
+TheItensePVPer died.
+
+Notifications for loading spawns
+Default to /plugins/config
+
+Spectator Spawns?
+
+Players not in game can attec the players in the game
 
 Features to Add Before Release:
 Information for all /ac __ commands
+- Update the suggested commands list for /ac asdjfklasdfa
 Give players a nonsense weapon for fun
 
 Far down the line:
