@@ -520,7 +520,7 @@ public class AmmunitionConundrum {
 		if (ent instanceof Player && victim instanceof Player){
 
 			//Either player is not alive in the round
-			if (deads.contains((Player)(ent)) || deads.contains((Player)(victim))){
+			if (!players.contains(ent) || !players.contains(victim) || deads.contains((Player)(ent)) || deads.contains((Player)(victim))){
 				((Player)(ent)).sendMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "Attacking this player is not allowed.");
 				e.setCancelled(true);
 			}

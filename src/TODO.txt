@@ -7,12 +7,16 @@ kevin_ga0 is the winner!
 You gained 1 points for landing a nice shot.
 TheItensePVPer died.
 
+Reflector gets 4pts if attacked the funman with melee
+
+"Successfully Teleported All Players" x2?
+
+Locations should be doubles
+
 Notifications for loading spawns
 Default to /plugins/config
 
 Spectator Spawns?
-
-Players not in game can attec the players in the game
 
 Features to Add Before Release:
 Information for all /ac __ commands

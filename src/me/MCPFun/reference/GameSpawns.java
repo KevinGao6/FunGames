@@ -54,9 +54,9 @@ public class GameSpawns {
 					int index2 = line.indexOf(',', index1 + 1);
 					
 					//Attempt to parse
-					int x = Integer.parseInt(line.substring(0, index1));
-					int y = Integer.parseInt(line.substring(index1 + 1, index2));
-					int z = Integer.parseInt(line.substring(index2 + 1));
+					double x = Double.parseDouble(line.substring(0, index1));
+					double y = Double.parseDouble(line.substring(index1 + 1, index2));
+					double z = Double.parseDouble(line.substring(index2 + 1));
 					
 					//If successful, make location and add new location
 					Location newLoc = new Location(Bukkit.getWorlds().get(0),x,y,z);
