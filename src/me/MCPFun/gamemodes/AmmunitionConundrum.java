@@ -86,7 +86,7 @@ public class AmmunitionConundrum {
 	private static final int PTS_PER_1ST_PLACE = 2;
 
 	//Should be negative
-	private static final int PTS_PER_DEATH = 0;
+//	private static final int PTS_PER_DEATH = 0;
 	private static final int PTS_LOST_PER_SELF_KILL = -1;
 	private static final int PTS_PER_2ND_PLACE = 1;
 
@@ -594,7 +594,7 @@ public class AmmunitionConundrum {
 			server.broadcastMessage(ChatColor.YELLOW + p.getDisplayName() + " died!");
 
 			//Update the settings of the player that just died
-			changeScore(p, PTS_PER_DEATH);
+			//			changeScore(p, PTS_PER_DEATH);
 			//			this.alert(p, "You lost " + PTS_PER_DEATH + " points for dying.");
 			statMap.get(p).addDeath();
 
@@ -623,6 +623,7 @@ public class AmmunitionConundrum {
 		if (alives.size() == 1){
 			winner = alives.get(0);
 			statMap.get(winner).addRoundWon();
+			changeScore(winner, PTS_PER_1ST_PLACE);
 			this.alert(winner, "You gained " + PTS_PER_1ST_PLACE + " points for winning the round.");
 			server.broadcastMessage("" + ChatColor.AQUA + ChatColor.BOLD + winner.getDisplayName() + " is the winner!");
 		}
@@ -742,7 +743,7 @@ public class AmmunitionConundrum {
 			this.tellModerator("List of loaded locations is null. Line 738 in Ammunition Conundrum.");
 		}
 	}
-	
+
 	/**
 	 * Teleports the players to the locations designated by spawnList
 	 */
@@ -751,19 +752,19 @@ public class AmmunitionConundrum {
 			this.tellModerator("spawnList not loaded. Aborting random teleporting...");
 			return;
 		}
-		
+
 		if (spawnList.size() < players.size()){
 			this.tellModerator("Not enough unique spawns locations in spawnList for all the participating players. Aborting random teleporting...");
 			return;
 		}
-		
+
 		ArrayList<Location> temp = new ArrayList<Location>(spawnList);
-		
+
 		for (Player p: players){
 			Location newLoc = temp.remove((int)(Math.random()*temp.size()));
 			p.teleport(newLoc);
 		}
-		
+
 		this.tellModerator("Successfully teleported all players.");
 	}
 }

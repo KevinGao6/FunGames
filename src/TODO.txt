@@ -1,6 +1,8 @@
 AmmunitionConundrum
 Bugs:
-
+Scoreboard >> Leaderboard
+Points aren't awarded to 1st place
+Funman kill msg is stupid
 
 Features to Add Before Release:
 Information for all /ac __ commands
