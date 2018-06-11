@@ -449,7 +449,7 @@ public class AmmunitionConundrum {
 
 		objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
-		objective.setDisplayName(ChatColor.GREEN + "Scoreboard");
+		objective.setDisplayName(ChatColor.GREEN + "Leaderboard");
 	}
 
 	/**
@@ -553,7 +553,6 @@ public class AmmunitionConundrum {
 				this.alert(shooter, "You gained " + PTS_PER_KILL + " points for landing a nice shot.");
 
 				statMap.get(shooter).addKill();
-				server.broadcastMessage("" + ChatColor.RED + "The funman's sole snowball finds a poor victim");
 			}
 		}
 	}
@@ -587,7 +586,7 @@ public class AmmunitionConundrum {
 					Player killer = ((Player)(damager));
 					statMap.get(killer).addKill();
 					changeScore(killer, PTS_PER_KILL);
-					this.alert(killer, "You gained " + PTS_PER_KILL + " points for stabbing " + p.getDisplayName() + ".");
+					this.alert(killer, "You gained " + PTS_PER_KILL + " points for neutralizing " + p.getDisplayName() + ".");
 				}
 			}
 
