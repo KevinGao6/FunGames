@@ -86,7 +86,7 @@ public class AmmunitionConundrum {
 	private static final int PTS_PER_1ST_PLACE = 2;
 
 	//Should be negative
-//	private static final int PTS_PER_DEATH = 0;
+	//	private static final int PTS_PER_DEATH = 0;
 	private static final int PTS_LOST_PER_SELF_KILL = -1;
 	private static final int PTS_PER_2ND_PLACE = 1;
 
@@ -735,11 +735,13 @@ public class AmmunitionConundrum {
 	 * Recieves a list of locations which act as the temporary spawn locations during the AC Game
 	 * @param locations
 	 */
-	public void receiveSpawnList(ArrayList<Location> locations){
-		if (locations != null)
+	public void receiveSpawnList(String name, ArrayList<Location> locations){
+		if (locations != null){
 			this.spawnList = locations;
+			this.tellModerator(locations.size() + " spawns loaded for " + name);
+		}
 		else{
-			this.tellModerator("List of loaded locations is null. Line 738 in Ammunition Conundrum.");
+			this.tellModerator("Invalid spawnList to load.");
 		}
 	}
 

@@ -13,14 +13,9 @@ Anti-killsteal glitches if hit + snowball after
 
 Snowballs can kill already dead players
 
-move loadspawns to gameAC
-
 forceroundover() that shuts down without anycalculation of scores
 
 teleport players facing 1 direction
-
-Notifications for loading spawns
-Default to /plugins/config
 
 Spectator Spawns?
 

@@ -33,6 +33,7 @@ public class GameSpawns {
 	 * @param sender the player sending the command
 	 */
 	public static void loadFile(String name, String fileName, CommandSender sender){
+		fileName = "plugins/" + fileName;
 		try(BufferedReader br = new BufferedReader(new FileReader(fileName))) {
 			
 			//Counters and temp variables

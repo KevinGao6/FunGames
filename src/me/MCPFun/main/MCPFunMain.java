@@ -242,6 +242,27 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 				}
 			}
 
+			// /loadspawns <name>
+			else if (arg0.equals("loadspawns")){
+
+				if(args.length != 2){
+					sender.sendMessage(ChatColor.RED + "Usage: /ac loadspawns <name>");
+				} 
+				else{
+					String temp = args[1];
+					//If valid number of args, attempt to retrieve the list of spawns
+					ArrayList<Location> spawns = GameSpawns.getSpawnList(temp);
+
+					if (spawns == null){
+						sender.sendMessage(ChatColor.RED + "No entry found under " + temp);
+					}
+					else{
+						gameAC.receiveSpawnList(temp, spawns);
+					}
+
+				}
+			}
+
 			// /AC removeall
 			else if (arg0.equals("removeall")){
 				gameAC.removeAllPlayers();
@@ -288,45 +309,24 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 		else if (cmdName.equals("delitems")){
 			UtilityCommands.deleteItems(server);
 		}
-		
+
 		// /loadfile <name> <fileName> 
 		else if (cmdName.equals("loadfile")){
-			
+
 			if (args.length != 2){
 				sender.sendMessage(ChatColor.RED + "Usage: /loadfile <name> <filename>");
 			}
-			
+
 			else{
 				//If valid number of args, attempt to load the file
 				String name = args[0];
 				String fileName = args[1];
 				GameSpawns.loadFile(name, fileName, sender);
 			}
-			
-			return true;
-			
-		}
-		
-		// /loadspawns <name>
-		else if (cmdName.equals("loadspawns")){
-			
-			if(args.length != 1){
-				sender.sendMessage(ChatColor.RED + "Usage: /loadspawns <name>");
-			} 
-			else{
-				//If valid number of args, attempt to retrieve the list of spawns
-				ArrayList<Location> spawns = GameSpawns.getSpawnList(args[0]);
-				
-				if (spawns == null){
-					sender.sendMessage(ChatColor.RED + "No entry found under " + args[0]);
-				}
-				else{
-					gameAC.receiveSpawnList(spawns);
-				}
-				
-			}
-		}
 
+			return true;
+
+		}
 		return true;
 	}
 
