@@ -524,7 +524,7 @@ public class AmmunitionConundrum {
 				((Player)(ent)).sendMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "Attacking this player is not allowed.");
 				e.setCancelled(true);
 			}
-			
+
 			//The attacked player is a reflector
 			else if (protecteds.contains((Player)(victim))){
 				e.setDamage(e.getDamage() * EXTRA_DAMAGE_CONSTANT);
@@ -540,7 +540,7 @@ public class AmmunitionConundrum {
 				((Player)(shooter)).sendMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "Attacking this player is not allowed.");
 				e.setCancelled(true);
 			}
-			
+
 			else if (protecteds.contains(shotted)){
 				shooter.setLastDamageCause(null);
 				shooter.setHealth(0.0);
@@ -580,7 +580,7 @@ public class AmmunitionConundrum {
 		//Killed by "nothing" - a snowball
 		if (EDE == null)
 			return;
-		
+
 		//A Kill that is part of this AC Game
 		if (alives.contains(p)){
 
@@ -625,10 +625,6 @@ public class AmmunitionConundrum {
 	 * Called at the end of a round
 	 */
 	public void roundOver(){
-		roundActive = false;
-		server.broadcastMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "Round Over!");
-		hasBoolay = false;
-
 		//If there was a winner
 		if (alives.size() == 1){
 			Player winner = null;
@@ -638,6 +634,10 @@ public class AmmunitionConundrum {
 			this.alert(winner, "You gained " + PTS_PER_1ST_PLACE + " points for winning the round.");
 			server.broadcastMessage("" + ChatColor.AQUA + ChatColor.BOLD + winner.getDisplayName() + " is the winner!");
 		}
+
+		roundActive = false;
+		server.broadcastMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "Round Over!");
+		hasBoolay = false;
 
 		for (Player p : players){
 			PlayerInventory inv = p.getInventory();
@@ -766,8 +766,17 @@ public class AmmunitionConundrum {
 	 */
 	public void receiveSpawnList(String name, ArrayList<Location> locations){
 		if (locations != null){
-			this.spawnList = locations;
-			this.tellModerator(locations.size() + " spawns loaded for " + name);
+			if (locations.size() < 1){
+				this.tellModerator("This ArrayList of (Location)s is empty.");
+				return;
+			}
+			ArrayList<Location> temp = new ArrayList<Location>(locations);
+			Location spawn = temp.remove(0);
+			Bukkit.getWorlds().get(0).setSpawnLocation(spawn.getBlockX(), spawn.getBlockY(), spawn.getBlockZ());
+			this.tellModerator("Spectator spawn set to (" + spawn.getBlockX() + "," + spawn.getBlockY() + "," + spawn.getBlockZ() + ")");
+			
+			this.spawnList = temp;
+			this.tellModerator(temp.size() + " spawns loaded for " + name);
 		}
 		else{
 			this.tellModerator("Invalid spawnList to load.");
@@ -779,7 +788,7 @@ public class AmmunitionConundrum {
 	 */
 	private void teleportPlayers(){
 		this.tellModerator("teleport players called.");
-		
+
 		if (spawnList == null){
 			this.tellModerator("spawnList not loaded. Aborting random teleporting...");
 			return;

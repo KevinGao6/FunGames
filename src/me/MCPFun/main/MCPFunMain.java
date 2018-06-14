@@ -80,6 +80,21 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 
 		String cmdName = cmd.getName();
 
+		if (cmdName.equals("loc") && sender instanceof Player){
+			Location loc = ((Player)sender).getLocation();
+			String msg = "";
+			msg += loc.getX();
+			msg += ",";
+			msg += loc.getY();
+			msg += ",";
+			msg += loc.getZ();
+			msg += ",";
+			msg += loc.getYaw();
+			msg += ",";
+			msg += loc.getPitch();
+			sender.sendMessage(msg);
+		}
+		
 		//OP COMMANDS FROM HERE ON OUT
 		if (!sender.isOp()){
 			sender.sendMessage("" + ChatColor.RED + "You do not have permission to use this command.");

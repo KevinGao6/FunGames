@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -19,7 +20,7 @@ import org.bukkit.command.CommandSender;
 public class GameSpawns {
 
 	private static HashMap<String, ArrayList<Location>> spawnMap = new HashMap<String, ArrayList<Location>>();
-	
+
 	/**
 	 * Attempts to load a file containing spawn locations
 	 * FORMAT:
@@ -35,12 +36,12 @@ public class GameSpawns {
 	public static void loadFile(String name, String fileName, CommandSender sender){
 		fileName = "plugins/" + fileName;
 		try(BufferedReader br = new BufferedReader(new FileReader(fileName))) {
-			
+
 			//Counters and temp variables
 			ArrayList<Location> temp = new ArrayList<Location>();
 			int totalLines = 0;
 			int loadedLines = 0;
-			
+
 			//Each individual line
 			String line = br.readLine();
 
@@ -48,24 +49,55 @@ public class GameSpawns {
 			while (line != null) {
 				totalLines ++;
 
-				//Attempt to parse location
-				try{
-					//Get indices of numbers
-					int index1 = line.indexOf(',');
-					int index2 = line.indexOf(',', index1 + 1);
-					
-					//Attempt to parse
-					double x = Double.parseDouble(line.substring(0, index1));
-					double y = Double.parseDouble(line.substring(index1 + 1, index2));
-					double z = Double.parseDouble(line.substring(index2 + 1));
-					
-					//If successful, make location and add new location
-					Location newLoc = new Location(Bukkit.getWorlds().get(0),x,y,z);
-					temp.add(newLoc);
-					loadedLines ++;
-				} catch (Exception e){
+				int count = StringUtils.countMatches(line, ",");
+
+				if (count == 4){
+					//Attempt to parse location
+					try{
+						//Get indices of numbers
+						int index1 = line.indexOf(',');
+						int index2 = line.indexOf(',', index1 + 1);
+						int index3 = line.indexOf(',', index2 + 1);
+						int index4 = line.indexOf(',', index3 + 1);
+
+						//Attempt to parse
+						double x = Double.parseDouble(line.substring(0, index1));
+						double y = Double.parseDouble(line.substring(index1 + 1, index2));
+						double z = Double.parseDouble(line.substring(index2 + 1, index3));
+						float yaw = Float.parseFloat(line.substring(index3 + 1, index4));
+						float pitch = Float.parseFloat(line.substring(index4 + 1));
+
+						//If successful, make location and add new location
+						Location newLoc = new Location(Bukkit.getWorlds().get(0),x,y,z);
+						newLoc.setYaw(yaw);
+						newLoc.setPitch(pitch);
+						temp.add(newLoc);
+						loadedLines ++;
+					} catch (Exception e){
+
+					}
 				}
-				
+
+				else{
+					//Attempt to parse location
+					try{
+						//Get indices of numbers
+						int index1 = line.indexOf(',');
+						int index2 = line.indexOf(',', index1 + 1);
+
+						//Attempt to parse
+						double x = Double.parseDouble(line.substring(0, index1));
+						double y = Double.parseDouble(line.substring(index1 + 1, index2));
+						double z = Double.parseDouble(line.substring(index2 + 1));
+
+						//If successful, make location and add new location
+						Location newLoc = new Location(Bukkit.getWorlds().get(0),x,y,z);
+						temp.add(newLoc);
+						loadedLines ++;
+					} catch (Exception e){
+					}
+				}
+
 				line = br.readLine();
 			}
 			
@@ -79,7 +111,7 @@ public class GameSpawns {
 				spawnMap.remove(name);
 		}
 	}
-	
+
 	/**
 	 * @param name the name of the ArrayList<Location> associated with it when loading the file
 	 * @return spawnMap.get(name)
