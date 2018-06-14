@@ -4,7 +4,7 @@ version: 0.1
 description: Implements a fun gamemode
 commands:
   AC: 
-    usage: /<command> [create|removeall|next|set|remove|add|delete|over|info|stats|setscore|changescore|resetscore] [Player]
+    usage: /<command> [create|removeall|next|set|remove|add|delete|over|info|stats|setscore|changescore|resetscore|loadspawns] [Player]
     description: Commands for the Ammunition Conundrum Game
     aliases: [AmmunitionConundrum]
   delmobs:
@@ -18,6 +18,3 @@ commands:
   loadfile:
     usage: /<command> [name] [filename]
     description: Saves a list of spawns under name in filename
-  loadspawns:
-    usage: /<command> [name]
-    description: Handles a list of already loaded spawns

@@ -1,19 +1,10 @@
 AmmunitionConundrum
 Bugs:
-Order of notifications : On snowball kill, there are multiple death msgs
 Round Over!
 You gained 2 points for winning the round.
 kevin_ga0 is the winner!
 You gained 1 points for landing a nice shot.
-TheItensePVPer died.
-
-Anti-killsteal glitches if hit + snowball after
-
-"Successfully Teleported All Players" x2?
-
-Snowballs can kill already dead players
-
-forceroundover() that shuts down without anycalculation of scores
+TheIntensePVPer died.
 
 teleport players facing 1 direction
 
@@ -21,7 +12,6 @@ Spectator Spawns?
 
 Features to Add Before Release:
 Information for all /ac __ commands
-- Update the suggested commands list for /ac asdjfklasdfa
 Give players a nonsense weapon for fun
 
 Far down the line:

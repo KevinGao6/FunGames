@@ -89,7 +89,7 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 		if (cmdName.equals("AC")){
 
 			if (args.length == 0){
-				sender.sendMessage(ChatColor.LIGHT_PURPLE + "Commands: create/add/set/remove/removeAll/next/delete/over");
+				sender.sendMessage(ChatColor.LIGHT_PURPLE + "Commands: create|removeall|next|set|remove|add|delete|over|info|stats|setscore|changescore|resetscore|loadspawns");
 				return true;
 			}
 
@@ -242,7 +242,7 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 				}
 			}
 
-			// /loadspawns <name>
+			// /AC loadspawns <name>
 			else if (arg0.equals("loadspawns")){
 
 				if(args.length != 2){
@@ -278,7 +278,7 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 			// /AC over
 			else if (arg0.equals("over")){
 				if (gameAC.getRoundActive())
-					gameAC.roundOver();
+					gameAC.forceRoundOver();
 				return true;
 			}
 
@@ -296,7 +296,7 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 
 			//AC + unknown argument0
 			else {
-				sender.sendMessage(ChatColor.LIGHT_PURPLE + "Commands: create/add/set/remove/removeAll/next/delete/over");
+				sender.sendMessage(ChatColor.LIGHT_PURPLE + "Commands: create|removeall|next|set|remove|add|delete|over|info|stats|setscore|changescore|resetscore|loadspawns");
 			}
 		}
 

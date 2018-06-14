@@ -520,10 +520,11 @@ public class AmmunitionConundrum {
 		if (ent instanceof Player && victim instanceof Player){
 
 			//Either player is not alive in the round
-			if (!players.contains(ent) || !players.contains(victim) || deads.contains((Player)(ent)) || deads.contains((Player)(victim))){
+			if ((!players.contains(ent) && players.contains(victim)) || deads.contains((Player)(ent)) || deads.contains((Player)(victim))){
 				((Player)(ent)).sendMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "Attacking this player is not allowed.");
 				e.setCancelled(true);
 			}
+			
 			//The attacked player is a reflector
 			else if (protecteds.contains((Player)(victim))){
 				e.setDamage(e.getDamage() * EXTRA_DAMAGE_CONSTANT);
@@ -531,11 +532,17 @@ public class AmmunitionConundrum {
 		}
 
 		//If the damager is a snowball shot by a player
-		else if (ent instanceof Snowball && ((Snowball)ent).getShooter() instanceof Player && ((Player)victim) instanceof Player){
+		else if (ent instanceof Snowball && ((Snowball)ent).getShooter() instanceof Player && victim instanceof Player){
 			Player shooter = (Player)(((Snowball)ent).getShooter());			
 			Player shotted = ((Player)victim);
 
-			if (protecteds.contains(shotted)){
+			if ((!players.contains(shooter) && players.contains(shotted)) || deads.contains(shooter) || deads.contains(shotted)){
+				((Player)(shooter)).sendMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "Attacking this player is not allowed.");
+				e.setCancelled(true);
+			}
+			
+			else if (protecteds.contains(shotted)){
+				shooter.setLastDamageCause(null);
 				shooter.setHealth(0.0);
 				//Give kill to reflector
 				statMap.get(shotted).addKill();
@@ -548,6 +555,7 @@ public class AmmunitionConundrum {
 			}
 
 			else{
+				shotted.setLastDamageCause(null);
 				shotted.setHealth(0.0);;
 				changeScore(shooter, PTS_PER_KILL);
 				this.alert(shooter, "You gained " + PTS_PER_KILL + " points for landing a nice shot.");
@@ -566,10 +574,13 @@ public class AmmunitionConundrum {
 		if(!roundActive)
 			return;
 
-
 		Player p = e.getEntity();
 		EntityDamageEvent EDE = p.getLastDamageCause();
 
+		//Killed by "nothing" - a snowball
+		if (EDE == null)
+			return;
+		
 		//A Kill that is part of this AC Game
 		if (alives.contains(p)){
 
@@ -590,7 +601,7 @@ public class AmmunitionConundrum {
 				}
 			}
 
-			server.broadcastMessage(ChatColor.YELLOW + p.getDisplayName() + " died!");
+			server.broadcastMessage(ChatColor.WHITE + p.getDisplayName() + " died!");
 
 			//Update the settings of the player that just died
 			//			changeScore(p, PTS_PER_DEATH);
@@ -616,16 +627,34 @@ public class AmmunitionConundrum {
 	public void roundOver(){
 		roundActive = false;
 		server.broadcastMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "Round Over!");
-		Player winner = null;
+		hasBoolay = false;
 
 		//If there was a winner
 		if (alives.size() == 1){
+			Player winner = null;
 			winner = alives.get(0);
 			statMap.get(winner).addRoundWon();
 			changeScore(winner, PTS_PER_1ST_PLACE);
 			this.alert(winner, "You gained " + PTS_PER_1ST_PLACE + " points for winning the round.");
 			server.broadcastMessage("" + ChatColor.AQUA + ChatColor.BOLD + winner.getDisplayName() + " is the winner!");
 		}
+
+		for (Player p : players){
+			PlayerInventory inv = p.getInventory();
+			inv.clear();
+			inv.setHelmet(null);
+			inv.setChestplate(null);
+			inv.setLeggings(null);
+			inv.setBoots(null);
+		}
+	}
+
+	/**
+	 * Called to force the end of a round with no score calculation
+	 */
+	public void forceRoundOver(){
+		roundActive = false;
+		server.broadcastMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "Round Over!");
 		hasBoolay = false;
 
 		for (Player p : players){
@@ -749,6 +778,8 @@ public class AmmunitionConundrum {
 	 * Teleports the players to the locations designated by spawnList
 	 */
 	private void teleportPlayers(){
+		this.tellModerator("teleport players called.");
+		
 		if (spawnList == null){
 			this.tellModerator("spawnList not loaded. Aborting random teleporting...");
 			return;
