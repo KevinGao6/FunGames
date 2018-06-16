@@ -411,11 +411,11 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 		
 		// /closefile
 		else if (cmdName.equals("closefile")){
-			boolean success = GameSpawns.closeWriter();
-			if (success)
-				sender.sendMessage(ChatColor.GREEN + "Successfully saved " + ChatColor.AQUA + GameSpawns.getFileName());
+			String success = GameSpawns.closeWriter();
+			if (success != null)
+				sender.sendMessage(ChatColor.GREEN + "Successfully saved " + ChatColor.AQUA + success);
 			else
-				sender.sendMessage(ChatColor.RED + "Error closing " + ChatColor.AQUA + GameSpawns.getFileName());
+				sender.sendMessage(ChatColor.RED + "Error closing " + ChatColor.AQUA + success);
 
 		}
 
@@ -534,7 +534,7 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 	@EventHandler
 	public void onPlayerRespawn(PlayerRespawnEvent e) {
 		Player p = e.getPlayer();
-		if (gameAC != null && gameAC.contains(p)){
+		if (gameAC != null && gameAC.hasSpawnSaved() && gameAC.contains(p)){
 			e.setRespawnLocation(gameAC.getSpawnDirection());
 		}
 	}

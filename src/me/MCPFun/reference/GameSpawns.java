@@ -38,7 +38,7 @@ public class GameSpawns {
 	 * @param sender the player sending the command
 	 */
 	public static void loadFile(String name, String fileName, CommandSender sender){
-		fileName = "plugins/" + fileName;
+		fileName = "plugins/" + fileName + ".spawn";
 		try(BufferedReader br = new BufferedReader(new FileReader(fileName))) {
 
 			//Counters and temp variables
@@ -132,7 +132,7 @@ public class GameSpawns {
 	 * @return true if successful, false otherwise
 	 */
 	public static boolean createFile(String name){
-		name = name + ".spawn";
+		name = "plugins/" + name + ".spawn";
 		try {
 			writer = new PrintWriter(new File(name), "UTF-8");
 			fileName = name;
@@ -164,16 +164,17 @@ public class GameSpawns {
 	
 	/**
 	 * Closes the current PrintWritter
-	 * @return true if successful, false otherwise
+	 * @return saved file's name if successful, null otherwise
 	 */
-	public static boolean closeWriter(){
+	public static String closeWriter(){
 		try{
 			writer.close();
 			writer = null;
+			String toReturn = fileName;
 			fileName = null;
-			return true;
+			return toReturn;
 		} catch (Exception e){
-			return false;
+			return null;
 		}
 	}
 	

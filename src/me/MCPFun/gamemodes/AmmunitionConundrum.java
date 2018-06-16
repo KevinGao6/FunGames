@@ -66,7 +66,7 @@ public class AmmunitionConundrum {
 	/**
 	 * Ticks which a normal player is set aflame if he/she misfires
 	 */
-	private static final int DEFAULT_MISFIRE_LENGTH_TICKS = 10;
+	private static final int DEFAULT_MISFIRE_LENGTH_TICKS = 100;
 
 	/**
 	 * Maximum number of players that can participate in a singular AC Game
@@ -560,6 +560,7 @@ public class AmmunitionConundrum {
 				e.setCancelled(true);
 			}
 
+			//Funman shoots reflector
 			else if (protecteds.contains(shotted)){
 				shooter.setLastDamageCause(null);
 				shooter.setHealth(0.0);
@@ -573,6 +574,7 @@ public class AmmunitionConundrum {
 				this.alert(shooter, "You lost " + PTS_LOST_PER_SELF_KILL + " points for shooting the reflector.");
 			}
 
+			//Funman doesn't shoot reflector
 			else{
 				shotted.setLastDamageCause(null);
 				shotted.setHealth(0.0);;
@@ -598,6 +600,7 @@ public class AmmunitionConundrum {
 
 		//Killed by "nothing" - a snowball
 		if (EDE == null){
+			e.setDeathMessage(null);
 			e.getDrops().clear();
 			return;
 		}
@@ -709,6 +712,8 @@ public class AmmunitionConundrum {
 	 */
 	private void misfire(Player p){
 		EntityDamageEvent e = p.getLastDamageCause();
+		p.getWorld().createExplosion(p.getLocation(), 0.0F, false);
+
 		p.damage(DEFAULT_MISFIRE_DAMAGE);
 		p.setFireTicks(DEFAULT_MISFIRE_LENGTH_TICKS);
 		p.setLastDamageCause(e);
@@ -791,7 +796,7 @@ public class AmmunitionConundrum {
 			
 			Bukkit.getWorlds().get(0).setSpawnLocation(spawn.getBlockX(), spawn.getBlockY(), spawn.getBlockZ());
 
-			this.tellModerator("Spectator spawn set to" + spawn.getX() + "," + spawn.getY() + "," + spawn.getZ());
+			this.tellModerator("Spectator spawn set to " + spawn.getX() + "," + spawn.getY() + "," + spawn.getZ());
 			this.tellModerator(temp.size() + " spawns loaded for " + name);
 		}
 		else{
@@ -804,6 +809,13 @@ public class AmmunitionConundrum {
 	 */
 	public Location getSpawnDirection() {
 		return this.spawn;
+	}
+	
+	/**
+	 * @return true if there is a valid spawn location on file; false otherwise
+	 */
+	public boolean hasSpawnSaved(){
+		return !(this.spawn == null);
 	}
 
 	/**
