@@ -1,5 +1,23 @@
 AmmunitionConundrum
 Bugs:
+Player leaving who isn't part of any game, don't remove - .contains
+teleport players called x2 - check for each player or remove completely
+please access with /loadspawns 1
+killing with snowball drops weapons
+add more private helper methods
+writespawns
+can't add player while round is active
+/ac delete should remove leaderboard
+players can still attack non participating players during rounds
+full health on /ac create
+fix the pitch/yaw on spawn -- remember spawn and if (gameAC != null)
+e.setEventCancelled ( playerSpawning(Player p))
+true if contains player and set spawn
+false if either is false/null
+disable name tags for alive players to alive players
+/player is user brightness hacks.
+
+/locktime in utility commands lock time on load of prison.spawn
 
 Features to Add Before Release:
 

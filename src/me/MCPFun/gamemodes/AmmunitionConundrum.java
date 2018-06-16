@@ -772,8 +772,15 @@ public class AmmunitionConundrum {
 			}
 			ArrayList<Location> temp = new ArrayList<Location>(locations);
 			Location spawn = temp.remove(0);
-			Bukkit.getWorlds().get(0).setSpawnLocation(spawn.getBlockX(), spawn.getBlockY(), spawn.getBlockZ());
-			this.tellModerator("Spectator spawn set to (" + spawn.getBlockX() + "," + spawn.getBlockY() + "," + spawn.getBlockZ() + ")");
+			Location oldSpawn = Bukkit.getWorlds().get(0).getSpawnLocation();
+			oldSpawn.setX(spawn.getX());
+			oldSpawn.setY(spawn.getY());
+			oldSpawn.setZ(spawn.getZ());
+			oldSpawn.setYaw(spawn.getYaw());
+			oldSpawn.setPitch(spawn.getPitch());
+			spawn = Bukkit.getWorlds().get(0).getSpawnLocation();
+			this.tellModerator("Spectator spawn set to (" + spawn.getX() + "," + spawn.getY() + "," + spawn.getZ() + "," + spawn.getYaw() + "," + spawn.getPitch() + ")");
+			this.tellModerator("" + oldSpawn.equals(spawn));
 			
 			this.spawnList = temp;
 			this.tellModerator(temp.size() + " spawns loaded for " + name);

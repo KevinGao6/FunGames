@@ -52,6 +52,7 @@ public class GameSpawns {
 				int count = StringUtils.countMatches(line, ",");
 
 				if (count == 4){
+					System.out.println("4 commas!");
 					//Attempt to parse location
 					try{
 						//Get indices of numbers
@@ -73,12 +74,14 @@ public class GameSpawns {
 						newLoc.setPitch(pitch);
 						temp.add(newLoc);
 						loadedLines ++;
+						System.out.println("Successfully loaded a yaw/pitch line.");
 					} catch (Exception e){
 
 					}
 				}
 
 				else{
+					System.out.println("Not 4 commas!");
 					//Attempt to parse location
 					try{
 						//Get indices of numbers
@@ -94,6 +97,7 @@ public class GameSpawns {
 						Location newLoc = new Location(Bukkit.getWorlds().get(0),x,y,z);
 						temp.add(newLoc);
 						loadedLines ++;
+						System.out.println("Successfully loaded a normal line.");
 					} catch (Exception e){
 					}
 				}
