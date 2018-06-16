@@ -167,6 +167,11 @@ public class AmmunitionConundrum {
 	private ArrayList<Location> spawnList;
 
 	/**
+	 * The designated spawn point for spectators in the AC game
+	 */
+	private Location spawn;
+	
+	/**
 	 * Default constructor
 	 * @param moderator the default moderator
 	 */
@@ -780,24 +785,26 @@ public class AmmunitionConundrum {
 				this.tellModerator("This ArrayList of (Location)s is empty.");
 				return;
 			}
+			
 			ArrayList<Location> temp = new ArrayList<Location>(locations);
-			Location spawn = temp.remove(0);
-			Location oldSpawn = Bukkit.getWorlds().get(0).getSpawnLocation();
-			oldSpawn.setX(spawn.getX());
-			oldSpawn.setY(spawn.getY());
-			oldSpawn.setZ(spawn.getZ());
-			oldSpawn.setYaw(spawn.getYaw());
-			oldSpawn.setPitch(spawn.getPitch());
-			spawn = Bukkit.getWorlds().get(0).getSpawnLocation();
-			this.tellModerator("Spectator spawn set to (" + spawn.getX() + "," + spawn.getY() + "," + spawn.getZ() + "," + spawn.getYaw() + "," + spawn.getPitch() + ")");
-			this.tellModerator("" + oldSpawn.equals(spawn));
-
+			this.spawn = temp.remove(0);
 			this.spawnList = temp;
+			
+			Bukkit.getWorlds().get(0).setSpawnLocation(spawn.getBlockX(), spawn.getBlockY(), spawn.getBlockZ());
+
+			this.tellModerator("Spectator spawn set to" + spawn.getX() + "," + spawn.getY() + "," + spawn.getZ());
 			this.tellModerator(temp.size() + " spawns loaded for " + name);
 		}
 		else{
 			this.tellModerator("Invalid spawnList to load.");
 		}
+	}
+	
+	/**
+	 * @return the designated spawn point for players participating in the AC Game
+	 */
+	public Location getSpawnDirection() {
+		return this.spawn;
 	}
 
 	/**

@@ -1,8 +1,10 @@
 package me.MCPFun.reference;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -20,7 +22,9 @@ import org.bukkit.command.CommandSender;
 public class GameSpawns {
 
 	private static HashMap<String, ArrayList<Location>> spawnMap = new HashMap<String, ArrayList<Location>>();
-
+	private static PrintWriter writer;
+	private static String fileName;
+	
 	/**
 	 * Attempts to load a file containing spawn locations
 	 * FORMAT:
@@ -76,10 +80,8 @@ public class GameSpawns {
 						loadedLines ++;
 						System.out.println("Successfully loaded a yaw/pitch line.");
 					} catch (Exception e){
-
 					}
 				}
-
 				else{
 					System.out.println("Not 4 commas!");
 					//Attempt to parse location
@@ -122,5 +124,70 @@ public class GameSpawns {
 	 */
 	public static ArrayList<Location> getSpawnList(String name){
 		return spawnMap.get(name);
+	}
+	
+	/**
+	 * Creates a new .spawn file with the give name
+	 * Note: .spawn not needed
+	 * @return true if successful, false otherwise
+	 */
+	public static boolean createFile(String name){
+		name = name + ".spawn";
+		try {
+			writer = new PrintWriter(new File(name), "UTF-8");
+			fileName = name;
+			return true;
+		} catch (Exception e){
+			System.out.println("Error initializing PrintWriter for " + name);
+			return false;
+		}		
+	}
+	
+	/**
+	 * Writes the given string to the next line of the current file
+	 * -2 writer doesn't exist
+	 * -1 error writing line: IO exception
+	 * 0 line successfully written
+	 */
+	public static int writeLine(String line){
+		if (writer == null)
+			return -2;
+		
+		try{
+			writer.println(line);
+			return 0;
+		} catch (Exception e){
+			System.out.println("Error writing line to PrintWriter.");
+			return -1;
+		}
+	}
+	
+	/**
+	 * Closes the current PrintWritter
+	 * @return true if successful, false otherwise
+	 */
+	public static boolean closeWriter(){
+		try{
+			writer.close();
+			writer = null;
+			fileName = null;
+			return true;
+		} catch (Exception e){
+			return false;
+		}
+	}
+	
+	/**
+	 * @return true if there is a writer, false otherwise
+	 */
+	public static boolean hasWriter(){
+		return !(writer == null);
+	}
+	
+	/**
+	 * @return the name of the file that the user is currently editing, null if the user is not editing any file;
+	 */
+	public static String getFileName(){
+		return fileName;
 	}
 }

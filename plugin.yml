@@ -1,6 +1,6 @@
 name: MCPFun
 main: me.MCPFun.main.MCPFunMain
-version: 0.1
+version: 0.9
 description: Implements a fun gamemode
 commands:
   AC: 
@@ -21,3 +21,15 @@ commands:
   loc:
     usage: /<command>
     description: Prints your current location
+  hex:
+    usage: /<command> [Player]
+    description: Check a player for hacks
+  createfile:
+    usage: /<command> [name]
+    description: Creates a .spawn file with name
+  writefile:
+    usage: /<command> [line|loc]
+    description: Writes to the PrintWriter, if one exists
+  closefile:
+    usage: /<command>
+    description: Closes the PrintWriter

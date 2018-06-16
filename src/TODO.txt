@@ -1,17 +1,10 @@
 AmmunitionConundrum
-Bugs:
-full health on /ac create
-fix the pitch/yaw on spawn -- remember spawn and if (gameAC != null)
-e.setEventCancelled ( playerSpawning(Player p))
-true if contains player and set spawn
-false if either is false/null
-disable name tags for alive players to alive players
-/player is user brightness hacks.
-players can still attack non participating players during rounds
-writespawns
-
-
+To Fix:
 /locktime in utility commands lock time on load of prison.spawn
+Known Issues:
+players can still attack non participating players during rounds
+
+
 
 Features to Add Before Release:
 

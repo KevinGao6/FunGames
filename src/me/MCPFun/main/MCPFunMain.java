@@ -21,6 +21,7 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -93,11 +94,25 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 			msg += ",";
 			msg += loc.getPitch();
 			sender.sendMessage(msg);
+			return true;
 		}
-		
+
 		//OP COMMANDS FROM HERE ON OUT
 		if (!sender.isOp()){
 			sender.sendMessage("" + ChatColor.RED + "You do not have permission to use this command.");
+			return true;
+		}
+
+		if (cmdName.equals("hex")){
+			if (args.length != 1){
+				sender.sendMessage(ChatColor.RED + "Usage: /hex <Player>");
+			}
+			else{
+				Player p = server.getPlayer(args[0]);
+				if (p != null){
+					server.broadcastMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "[MCP Anti-Cheat] " + ChatColor.RESET + ChatColor.GOLD + ChatColor.BOLD + p.getDisplayName() + ChatColor.RED + " is using a brightness exploit.");
+				}
+			}
 			return true;
 		}
 
@@ -240,6 +255,7 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 						sender.sendMessage("" + ChatColor.LIGHT_PURPLE + "Invalid amount.");
 					}
 				}
+				return true;
 			}
 
 			// /AC resetscore <Player>
@@ -254,6 +270,7 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 					Player p = server.getPlayer(args[1]);
 					gameAC.resetScore(p);
 				}
+				return true;
 			}
 
 			// /AC loadspawns <name>
@@ -275,6 +292,8 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 					}
 
 				}
+
+				return true;
 			}
 
 			// /AC removeall
@@ -311,6 +330,7 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 			//AC + unknown argument0
 			else {
 				sender.sendMessage(ChatColor.LIGHT_PURPLE + "Commands: create|removeall|next|set|remove|add|delete|over|info|stats|setscore|changescore|resetscore|loadspawns");
+				return true;
 			}
 		}
 
@@ -341,6 +361,66 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 			return true;
 
 		}
+
+		// /createfile <name>
+		else if (cmdName.equals("createfile")){
+			if (args.length != 1){
+				sender.sendMessage(ChatColor.RED + "Usage: /createfile [name].spawn " + ChatColor.BOLD + "*no need to add the .spawn*");
+			}
+			else{
+				boolean success = GameSpawns.createFile(args[0]);
+				if (success)
+					sender.sendMessage(ChatColor.GREEN + "Successfully created " + GameSpawns.getFileName());
+			}
+			return true;
+		}
+
+		// /writefile [line|loc]
+		else if (cmdName.equals("writefile")){
+			int length = args.length;
+			if (!GameSpawns.hasWriter()){
+				sender.sendMessage(ChatColor.RED + "No PrintWriter exists!");
+				return true;
+			}
+			if (length != 1){
+				sender.sendMessage(ChatColor.RED + "Usage: /writefile [line|loc]");
+			}
+			else{
+				String arg = args[0];
+				if (arg.equals("loc")){
+					Location loc = ((Player)sender).getLocation();
+					arg = "";
+					arg += loc.getX();
+					arg += ",";
+					arg += loc.getY();
+					arg += ",";
+					arg += loc.getZ();
+					arg += ",";
+					arg += loc.getYaw();
+					arg += ",";
+					arg += loc.getPitch();
+				}
+				int result = GameSpawns.writeLine(arg);
+				if (result == 0)
+					sender.sendMessage(ChatColor.GREEN + "Successfully wrote " + ChatColor.WHITE + arg + ChatColor.GREEN + " to " + ChatColor.AQUA + GameSpawns.getFileName());
+				else
+					sender.sendMessage(ChatColor.RED + "Error writing: " + arg + " to " + ChatColor.AQUA + GameSpawns.getFileName());
+			}
+			return true;
+		}
+		
+		// /closefile
+		else if (cmdName.equals("closefile")){
+			boolean success = GameSpawns.closeWriter();
+			if (success)
+				sender.sendMessage(ChatColor.GREEN + "Successfully saved " + ChatColor.AQUA + GameSpawns.getFileName());
+			else
+				sender.sendMessage(ChatColor.RED + "Error closing " + ChatColor.AQUA + GameSpawns.getFileName());
+
+		}
+
+//		Bukkit.getWorld("world").setGa
+		
 		return true;
 	}
 
@@ -427,19 +507,19 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 	}
 
 	@EventHandler
-	public void onFoodChange(FoodLevelChangeEvent event){
+	public void onFoodChange(FoodLevelChangeEvent e){
 		if(gameAC != null){
-			Player victim = ((Player)(event.getEntity()));
+			Player victim = ((Player)(e.getEntity()));
 			victim.setFoodLevel(20);
-			event.setCancelled(true);
+			e.setCancelled(true);
 
 		}
 	}
 
 	@EventHandler
-	public void onCreatureSpawn(CreatureSpawnEvent event) {
+	public void onCreatureSpawn(CreatureSpawnEvent e) {
 		if(gameAC != null){
-			event.setCancelled(true);
+			e.setCancelled(true);
 		}
 	}
 
@@ -448,6 +528,14 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 		Player quitter = e.getPlayer();
 		if (gameAC != null && gameAC.contains(quitter)){
 			gameAC.removePlayer(quitter);
+		}
+	}
+
+	@EventHandler
+	public void onPlayerRespawn(PlayerRespawnEvent e) {
+		Player p = e.getPlayer();
+		if (gameAC != null && gameAC.contains(p)){
+			e.setRespawnLocation(gameAC.getSpawnDirection());
 		}
 	}
 }
