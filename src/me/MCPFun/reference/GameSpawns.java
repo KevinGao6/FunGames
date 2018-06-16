@@ -107,7 +107,7 @@ public class GameSpawns {
 			
 			spawnMap.put(name, temp);
 			sender.sendMessage(ChatColor.GREEN + "Successfully loaded " + loadedLines + " of " + totalLines + " lines in " + fileName);
-			sender.sendMessage(ChatColor.DARK_GREEN + "Saved ArrayList<Location> as " + name + "; please access with /loadspawns " + name);
+			sender.sendMessage(ChatColor.DARK_GREEN + "Saved ArrayList<Location> as " + name + "; please access with /ac loadspawns " + name);
 		} catch (IOException e) {
 			//Errors in reading files
 			sender.sendMessage(ChatColor.DARK_RED + "Unable to load " + fileName + "");

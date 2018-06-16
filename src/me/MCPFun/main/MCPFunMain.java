@@ -140,7 +140,6 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 
 			// /AC delete
 			else if (arg0.equals("delete")){
-				gameAC.roundOver();
 				gameAC = null;
 				sender.sendMessage("" + ChatColor.LIGHT_PURPLE + "AC Game deleted.");
 				server.broadcastMessage("" + ChatColor.GOLD + "Re-enabling Mob spawning...");
@@ -446,8 +445,9 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 
 	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent e){
-		if (gameAC != null){
-			gameAC.removePlayer(e.getPlayer());
+		Player quitter = e.getPlayer();
+		if (gameAC != null && gameAC.contains(quitter)){
+			gameAC.removePlayer(quitter);
 		}
 	}
 }

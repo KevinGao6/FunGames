@@ -236,6 +236,12 @@ public class AmmunitionConundrum {
 	 */
 	@SuppressWarnings("deprecation")
 	public void addPlayer(Player p){
+
+		if(roundActive){
+			this.tellModerator("Cannot add a new player while a round is active.");
+			return;
+		}
+
 		if (players.size() >= MAX_PLAYERS){
 			this.tellModerator("Too many existing players. Please remove a player before adding another.");
 			return;
@@ -276,7 +282,7 @@ public class AmmunitionConundrum {
 	public boolean removePlayer(Player p){
 
 		if (p == null){
-			this.tellModerator("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Could not find Player.");
+			this.tellModerator("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Null player.");
 			return false;
 		}
 
@@ -321,6 +327,14 @@ public class AmmunitionConundrum {
 	 */
 	public boolean getRoundActive(){
 		return roundActive;
+	}
+
+	/**
+	 * @param p the Player to check
+	 * @return true if the player is participating in this AC game, false otherwise
+	 */
+	public boolean contains(Player p){
+		return players.contains(p);
 	}
 
 	/**
@@ -405,11 +419,11 @@ public class AmmunitionConundrum {
 
 		ArrayList<Player> curPlayers = new ArrayList<Player>(players.size());
 		for (Player p: players){
-
-			teleportPlayers();
 			curPlayers.add(p);
 			alives.add(p);
 		}
+
+		teleportPlayers();
 
 		int ran = 0;
 		//One Special
@@ -578,9 +592,10 @@ public class AmmunitionConundrum {
 		EntityDamageEvent EDE = p.getLastDamageCause();
 
 		//Killed by "nothing" - a snowball
-		if (EDE == null)
+		if (EDE == null){
+			e.getDrops().clear();
 			return;
-
+		}
 		//A Kill that is part of this AC Game
 		if (alives.contains(p)){
 
@@ -639,14 +654,7 @@ public class AmmunitionConundrum {
 		server.broadcastMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "Round Over!");
 		hasBoolay = false;
 
-		for (Player p : players){
-			PlayerInventory inv = p.getInventory();
-			inv.clear();
-			inv.setHelmet(null);
-			inv.setChestplate(null);
-			inv.setLeggings(null);
-			inv.setBoots(null);
-		}
+		this.clearAllCurPlayerInventories();
 	}
 
 	/**
@@ -657,14 +665,7 @@ public class AmmunitionConundrum {
 		server.broadcastMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "Round Over!");
 		hasBoolay = false;
 
-		for (Player p : players){
-			PlayerInventory inv = p.getInventory();
-			inv.clear();
-			inv.setHelmet(null);
-			inv.setChestplate(null);
-			inv.setLeggings(null);
-			inv.setBoots(null);
-		}
+		this.clearAllCurPlayerInventories();
 	}
 
 	/**
@@ -674,6 +675,15 @@ public class AmmunitionConundrum {
 		for(Player p: players){
 			server.broadcastMessage(p.getDisplayName() + " has " + statMap.get(p));
 		}
+	}
+
+	/**
+	 * This method removes the necessary components to delete this AC game
+	 */
+	public void deleteGame(){
+		for (Player p: players)
+			p.setScoreboard(manager.getNewScoreboard());
+		this.forceRoundOver();
 	}
 
 	/**
@@ -781,7 +791,7 @@ public class AmmunitionConundrum {
 			spawn = Bukkit.getWorlds().get(0).getSpawnLocation();
 			this.tellModerator("Spectator spawn set to (" + spawn.getX() + "," + spawn.getY() + "," + spawn.getZ() + "," + spawn.getYaw() + "," + spawn.getPitch() + ")");
 			this.tellModerator("" + oldSpawn.equals(spawn));
-			
+
 			this.spawnList = temp;
 			this.tellModerator(temp.size() + " spawns loaded for " + name);
 		}
@@ -814,5 +824,26 @@ public class AmmunitionConundrum {
 		}
 
 		this.tellModerator("Successfully teleported all players.");
+	}
+
+	/**
+	 * Clears the inventory and armor of the given player
+	 */
+	private void clearInventory(Player p){
+		PlayerInventory inv = p.getInventory();
+		inv.clear();
+		inv.setHelmet(null);
+		inv.setChestplate(null);
+		inv.setLeggings(null);
+		inv.setBoots(null);
+	}
+
+	/**
+	 * Clears the inventory and armor of all participating players
+	 */
+	private void clearAllCurPlayerInventories(){
+		for(Player p: players){
+			this.clearInventory(p);
+		}
 	}
 }
