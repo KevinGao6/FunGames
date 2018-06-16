@@ -1,6 +1,13 @@
 AmmunitionConundrum
 To Fix:
-/locktime in utility commands lock time on load of prison.spawn
+deletegame should call removeAllPlayers
+check for null respawn location
+cancel deathmsg on snowball hit
+createfile defaults to /plugins
+successfully saved null
+loadfile default .spawn
+spectator spawn set to + SPACE
+actually set a player on fire + explosion effect?
 Known Issues:
 players can still attack non participating players during rounds
 

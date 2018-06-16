@@ -686,8 +686,7 @@ public class AmmunitionConundrum {
 	 * This method removes the necessary components to delete this AC game
 	 */
 	public void deleteGame(){
-		for (Player p: players)
-			p.setScoreboard(manager.getNewScoreboard());
+		this.removeAllPlayers();
 		this.forceRoundOver();
 	}
 
