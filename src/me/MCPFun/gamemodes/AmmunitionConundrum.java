@@ -320,6 +320,7 @@ public class AmmunitionConundrum {
 	 */
 	public void removeAllPlayers(){
 
+		ArrayList<Player> tempPlayers = new ArrayList<Player>(players);
 		for (Player p: players){
 			removePlayer(p);
 		}
@@ -712,7 +713,7 @@ public class AmmunitionConundrum {
 	 */
 	private void misfire(Player p){
 		EntityDamageEvent e = p.getLastDamageCause();
-		p.getWorld().createExplosion(p.getLocation(), 0.0F, false);
+		p.getWorld().createExplosion(p.getLocation(), 4.0F, false);
 
 		p.damage(DEFAULT_MISFIRE_DAMAGE);
 		p.setFireTicks(DEFAULT_MISFIRE_LENGTH_TICKS);

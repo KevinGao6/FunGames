@@ -1,8 +1,11 @@
 AmmunitionConundrum
 To Fix:
-actually set a player on fire + explosion effect?
+removeall doesn't remove all players D:
+fire, fall damage another killsteal >> cancell all nonplayer damage events?
+player crashes - why round end?
 Known Issues:
 players can still attack non participating players during rounds
+
 
 
 
