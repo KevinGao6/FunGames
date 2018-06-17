@@ -65,9 +65,15 @@ public class AmmunitionConundrum {
 
 	/**
 	 * Ticks which a normal player is set aflame if he/she misfires
+	 * NOTE: As of right now, dying to fire will not credit last attacker
 	 */
-	private static final int DEFAULT_MISFIRE_LENGTH_TICKS = 100;
+	private static final int DEFAULT_MISFIRE_LENGTH_TICKS = 10;
 
+	/**
+	 * Size of the misfire explosion
+	 */
+	private static final float DEFAULT_MISFIRE_EXPLOSION_SIZE = 4.0F;
+	
 	/**
 	 * Maximum number of players that can participate in a singular AC Game
 	 */
@@ -89,7 +95,6 @@ public class AmmunitionConundrum {
 	//	private static final int PTS_PER_DEATH = 0;
 	private static final int PTS_LOST_PER_SELF_KILL = -1;
 	private static final int PTS_PER_2ND_PLACE = 1;
-
 
 	/**
 	 * This current server
@@ -296,7 +301,7 @@ public class AmmunitionConundrum {
 			return false;
 		}
 
-		if (roundActive){
+		if (roundActive && alives.size() <= 2){
 			roundOver();
 		}
 
@@ -321,9 +326,8 @@ public class AmmunitionConundrum {
 	public void removeAllPlayers(){
 
 		ArrayList<Player> tempPlayers = new ArrayList<Player>(players);
-		for (Player p: players){
-			removePlayer(p);
-		}
+		for (Player p: tempPlayers)
+			this.removePlayer(p);
 
 		this.tellModerator("All players removed.");
 	}
@@ -531,11 +535,6 @@ public class AmmunitionConundrum {
 		Entity ent = e.getDamager();
 		Entity victim = e.getEntity();
 
-		if (ent == null || victim == null){
-			System.out.println("Something is amiss");
-			return;
-		}
-
 		//Player attacks player
 		if (ent instanceof Player && victim instanceof Player){
 
@@ -563,8 +562,8 @@ public class AmmunitionConundrum {
 
 			//Funman shoots reflector
 			else if (protecteds.contains(shotted)){
-				shooter.setLastDamageCause(null);
 				shooter.setHealth(0.0);
+				shooter.setLastDamageCause(null);
 				//Give kill to reflector
 				statMap.get(shotted).addKill();
 				statMap.get(shooter).addSelfKill();
@@ -577,8 +576,8 @@ public class AmmunitionConundrum {
 
 			//Funman doesn't shoot reflector
 			else{
+				shotted.setHealth(0.0);
 				shotted.setLastDamageCause(null);
-				shotted.setHealth(0.0);;
 				changeScore(shooter, PTS_PER_KILL);
 				this.alert(shooter, "You gained " + PTS_PER_KILL + " points for landing a nice shot.");
 
@@ -713,7 +712,7 @@ public class AmmunitionConundrum {
 	 */
 	private void misfire(Player p){
 		EntityDamageEvent e = p.getLastDamageCause();
-		p.getWorld().createExplosion(p.getLocation(), 4.0F, false);
+		p.getWorld().createExplosion(p.getLocation(), DEFAULT_MISFIRE_EXPLOSION_SIZE, false);
 
 		p.damage(DEFAULT_MISFIRE_DAMAGE);
 		p.setFireTicks(DEFAULT_MISFIRE_LENGTH_TICKS);
