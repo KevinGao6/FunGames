@@ -1,8 +1,14 @@
 AmmunitionConundrum
 To Fix:
+MAX_DEFLECTOR_COUNT + MAX_
+on remove, remove from alive as well
+Magic Stick
+Auto load all spawn files
+Auto set day/night cycle
+
 Known Issues:
 players can still attack non participating players during rounds
-Dying to fire will not credit last attacker
+Dying to fire or fall damage will not credit last attacker
 
 
 

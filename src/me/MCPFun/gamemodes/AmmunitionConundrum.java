@@ -61,19 +61,19 @@ public class AmmunitionConundrum {
 	/**
 	 * Instant damage to a normal player that misfires
 	 */
-	private static final double DEFAULT_MISFIRE_DAMAGE = 4.0;
+	private static final double DEFAULT_MISFIRE_DAMAGE = 10.0;
 
 	/**
 	 * Ticks which a normal player is set aflame if he/she misfires
 	 * NOTE: As of right now, dying to fire will not credit last attacker
 	 */
-	private static final int DEFAULT_MISFIRE_LENGTH_TICKS = 10;
+	private static final int DEFAULT_MISFIRE_LENGTH_TICKS = 60;
 
 	/**
 	 * Size of the misfire explosion
 	 */
 	private static final float DEFAULT_MISFIRE_EXPLOSION_SIZE = 4.0F;
-	
+
 	/**
 	 * Maximum number of players that can participate in a singular AC Game
 	 */
@@ -175,7 +175,12 @@ public class AmmunitionConundrum {
 	 * The designated spawn point for spectators in the AC game
 	 */
 	private Location spawn;
-	
+
+	/**
+	 * Whether or not to spawn a reflector when < 3 players
+	 */
+	private boolean debugReflector;
+
 	/**
 	 * Default constructor
 	 * @param moderator the default moderator
@@ -427,27 +432,43 @@ public class AmmunitionConundrum {
 		deads = new ArrayList<Player>();
 		alives = new ArrayList<Player>();
 
-		ArrayList<Player> curPlayers = new ArrayList<Player>(players.size());
-		for (Player p: players){
-			curPlayers.add(p);
+		ArrayList<Player> curPlayers = new ArrayList<Player>(players);
+		for (Player p: players)
 			alives.add(p);
-		}
 
 		teleportPlayers();
 
 		int ran = 0;
-		//One Special
-		if (players.size() > 0){
-			ran = (int)(Math.random()*curPlayers.size());
-			specials.add(curPlayers.remove(ran));
+
+		//debugReflector mode
+		if (debugReflector){
+			if(curPlayers.size() > 0){
+				ran = (int)(Math.random()*curPlayers.size());
+				protecteds.add(curPlayers.remove(ran));
+			}
+			if(curPlayers.size() > 0){
+				ran = (int)(Math.random()*curPlayers.size());
+				specials.add(curPlayers.remove(ran));
+			}
 		}
 
-		//Deflector only if at least 3 players
-		if (players.size() > 2){
+		//not debugReflector mode
+		else if (curPlayers.size() > 0){
 			ran = (int)(Math.random()*curPlayers.size());
-			protecteds.add(curPlayers.remove(ran));
+			specials.add(curPlayers.remove(ran));
+
+			//Deflector only if at least 3 players
+			if (players.size() > 2){
+				ran = (int)(Math.random()*curPlayers.size());
+				protecteds.add(curPlayers.remove(ran));
+			}
 		}
-		else{
+
+
+
+		
+
+		if (players.size() < 3){
 			this.tellModerator("Play with 3 or more to get optimal experience.");
 		}
 
@@ -707,12 +728,27 @@ public class AmmunitionConundrum {
 	}
 
 	/**
+	 * Toggles the debugReflector boolean
+	 */
+	public void toggleDebug(){
+		this.debugReflector = !this.debugReflector;
+	}
+
+	/**
+	 * @return boolean debugReflector
+	 */
+	public boolean getDebug(){
+		return this.debugReflector;
+	}
+
+	/**
 	 * Damages and sets aflame a given player
 	 * @param p player that misfired
 	 */
 	private void misfire(Player p){
 		EntityDamageEvent e = p.getLastDamageCause();
-		p.getWorld().createExplosion(p.getLocation(), DEFAULT_MISFIRE_EXPLOSION_SIZE, false);
+		Location loc = p.getLocation();
+		p.getWorld().createExplosion(loc.getX(), loc.getY(), loc.getZ(), DEFAULT_MISFIRE_EXPLOSION_SIZE, false, false);
 
 		p.damage(DEFAULT_MISFIRE_DAMAGE);
 		p.setFireTicks(DEFAULT_MISFIRE_LENGTH_TICKS);
@@ -789,11 +825,11 @@ public class AmmunitionConundrum {
 				this.tellModerator("This ArrayList of (Location)s is empty.");
 				return;
 			}
-			
+
 			ArrayList<Location> temp = new ArrayList<Location>(locations);
 			this.spawn = temp.remove(0);
 			this.spawnList = temp;
-			
+
 			Bukkit.getWorlds().get(0).setSpawnLocation(spawn.getBlockX(), spawn.getBlockY(), spawn.getBlockZ());
 
 			this.tellModerator("Spectator spawn set to " + spawn.getX() + "," + spawn.getY() + "," + spawn.getZ());
@@ -803,14 +839,14 @@ public class AmmunitionConundrum {
 			this.tellModerator("Invalid spawnList to load.");
 		}
 	}
-	
+
 	/**
 	 * @return the designated spawn point for players participating in the AC Game
 	 */
 	public Location getSpawnDirection() {
 		return this.spawn;
 	}
-	
+
 	/**
 	 * @return true if there is a valid spawn location on file; false otherwise
 	 */

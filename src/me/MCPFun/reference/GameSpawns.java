@@ -56,7 +56,6 @@ public class GameSpawns {
 				int count = StringUtils.countMatches(line, ",");
 
 				if (count == 4){
-					System.out.println("4 commas!");
 					//Attempt to parse location
 					try{
 						//Get indices of numbers
@@ -83,7 +82,6 @@ public class GameSpawns {
 					}
 				}
 				else{
-					System.out.println("Not 4 commas!");
 					//Attempt to parse location
 					try{
 						//Get indices of numbers

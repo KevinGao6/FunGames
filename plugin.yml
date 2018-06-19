@@ -1,10 +1,10 @@
 name: MCPFun
 main: me.MCPFun.main.MCPFunMain
-version: 0.9
+version: 1.0.0
 description: Implements a fun gamemode
 commands:
   AC: 
-    usage: /<command> [create|removeall|next|set|remove|add|delete|over|info|stats|setscore|changescore|resetscore|loadspawns] [Player]
+    usage: /<command> [create|removeall|next|set|remove|add|delete|over|info|stats|setscore|changescore|resetscore|loadspawns|toggledebug] [Player]
     description: Commands for the Ammunition Conundrum Game
     aliases: [AmmunitionConundrum]
   delmobs:

@@ -119,7 +119,7 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 		if (cmdName.equals("AC")){
 
 			if (args.length == 0){
-				sender.sendMessage(ChatColor.LIGHT_PURPLE + "Commands: create|removeall|next|set|remove|add|delete|over|info|stats|setscore|changescore|resetscore|loadspawns");
+				sender.sendMessage(ChatColor.LIGHT_PURPLE + "Commands: create|removeall|next|set|remove|add|delete|over|info|stats|setscore|changescore|resetscore|loadspawns|toggledebug");
 				return true;
 			}
 
@@ -326,10 +326,16 @@ public class MCPFunMain extends JavaPlugin implements Listener{
 				gameAC.showPlayerStats();
 				return true;
 			}
+			
+			else if (arg0.equals("toggledebug")){
+				gameAC.toggleDebug();
+				sender.sendMessage(ChatColor.RED + "debugReflector set to " + gameAC.getDebug());
+				return true;
+			}
 
 			//AC + unknown argument0
 			else {
-				sender.sendMessage(ChatColor.LIGHT_PURPLE + "Commands: create|removeall|next|set|remove|add|delete|over|info|stats|setscore|changescore|resetscore|loadspawns");
+				sender.sendMessage(ChatColor.LIGHT_PURPLE + "Commands: create|removeall|next|set|remove|add|delete|over|info|stats|setscore|changescore|resetscore|loadspawns|toggledebug");
 				return true;
 			}
 		}
